@@ -7,29 +7,30 @@ def diagonal_matrix(length):
     """Creates the Matrix M of the eigenvalue problem. Length is the 
     (length x length) size of a grid."""
 
-    N = length*length
+    size = N * N
 
-    # Create zero matrix, size of (N*N) x (N*N) 
-    matrix_M = np.zeros((N, N))
+    # Initialize matrix with zeros
+    M = np.zeros((size, size))
 
-    # i == j
-    np.fill_diagonal(matrix_M, -4)
+    for i in range(size):
+        M[i, i] = -4  # Center point
 
-    # i == j-1
-    np.fill_diagonal(matrix_M[1:], 1)
+        if (i + 1) % N != 0:  # Right neighbor
+            M[i, i + 1] = 1
+        
+        if i % N != 0:  # Left neighbor
+            M[i, i - 1] = 1
 
-    # i == j+1
-    np.fill_diagonal(matrix_M[:, 1:], 1)
+        if i + N < size:  # Bottom neighbor
+            M[i, i + N] = 1
 
-    # i == j-4
-    np.fill_diagonal(matrix_M[4:], 1)
+        if i - N >= 0:  # Top neighbor
+            M[i, i - N] = 1
 
-    # i == j+4
-    np.fill_diagonal(matrix_M[:, 4:], 1)
+    return M  # Scale by step size squared
 
-    return matrix_M
 
-N = 4
+N = 10
 modes = 6
 
 diag_M = diagonal_matrix(N)
@@ -48,6 +49,7 @@ eigenmodes = eigenvectors.reshape(N, N, -1)
 #print(eigenvectors)
 #print(eigenmodes)
 
+
 def visualize_multiple_modes(eigenmodes, N, num_modes=6):
     """Plots eigenmodes"""
     fig, axes = plt.subplots(2, 3, figsize=(12, 8))
@@ -56,7 +58,7 @@ def visualize_multiple_modes(eigenmodes, N, num_modes=6):
     axes = axes.flatten()
     
     for i in range(num_modes):
-        axes[i].imshow(eigenmodes[:, :, i], cmap='coolwarm')
+        axes[i].imshow(eigenmodes[:, :, i], cmap='coolwarm', extent=[0, 1, 0, 1])
         axes[i].set_title(f"Mode = {i+1}")
         #axes[i].axis('off')
 
@@ -64,4 +66,5 @@ def visualize_multiple_modes(eigenmodes, N, num_modes=6):
     plt.tight_layout()
     plt.show()
 
-#visualize_multiple_modes(eigenmodes, N, num_modes=6)
+
+visualize_multiple_modes(eigenmodes, N, num_modes=6)
