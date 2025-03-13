@@ -18,7 +18,7 @@ def square_domain(L, steps):
 
     # plots domain with boundary conditions set
     plt.imshow(grid, cmap="plasma", extent=[0,L,0,L])
-    plt.show()
+    # plt.show()
 
     return grid
 
@@ -31,7 +31,7 @@ def rectangular_domain(L, steps):
 
     # plots domain with boundary conditions set
     plt.imshow(grid, cmap="plasma", extent=[0,2*L,0,L])
-    plt.show()
+    # plt.show()
 
     return grid
 
@@ -82,7 +82,7 @@ def circular_domain(L, steps):
 
     # plots domain with boundary conditions set
     plt.imshow(grid, cmap="plasma", extent=[0,L,0,L])
-    plt.show()
+    # plt.show()
 
     return grid
 
@@ -93,6 +93,6 @@ L = 1
 # must be even for square domain
 steps = 8
 
-square_domain(L, steps)
-rectangular_domain(L, steps)
-circular_domain(L, steps)
+# square_domain(L, steps)
+# rectangular_domain(L, steps)
+# circular_domain(L, steps)
