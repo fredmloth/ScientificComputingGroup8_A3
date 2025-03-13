@@ -17,7 +17,16 @@ def laplacian_matrix(length):
 
             if i == (j-1):
                 matrix_M[i,j] = 1
-    print(matrix_M)
-    return
 
-laplacian_matrix(4)
+            if i == (j+1):
+                matrix_M[i,j] = 1
+
+            if i == (j-4):
+                matrix_M[i,j] = 1
+
+            if i == (j+4):
+                matrix_M[i,j] = 1
+
+    return matrix_M
+
+print(laplacian_matrix(4))
