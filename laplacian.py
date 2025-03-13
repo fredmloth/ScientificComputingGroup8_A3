@@ -35,4 +35,14 @@ modes = 6
 lap_M = laplacian_matrix(N)
 print(lap_M)
 
-eigenvalues, eigenvectors = scipy.linalg.eigh(lap_M, modes)
+# Each eigenvector column is a mode
+
+eigenvalues, eigenvectors = scipy.linalg.eigh(lap_M)
+
+# Only take smallest number and each eigenvector column is a mode so 
+# need similar nr of columns 
+smallest_nr = 6
+eigenvalues = eigenvalues[:modes] 
+eigenvectors = eigenvectors[:, :modes]
+
+print(eigenvalues)
