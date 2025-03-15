@@ -29,9 +29,13 @@ def diagonal_matrix(length):
 
     return M  # Scale by step size squared
 
+
+# If plots left on a line, prints empty plots, how to remove?
 def visualize_multiple_modes(eigenmodes, N, num_modes=6):
     """Plots eigenmodes"""
-    fig, axes = plt.subplots(2, 3, figsize=(12, 8))
+
+    horizontal = ((num_modes // 3) +(num_modes % 3))
+    fig, axes = plt.subplots(horizontal, 3, figsize=(12, 8))
 
     # Flatten the axes for correct image rendering
     axes = axes.flatten()
@@ -47,18 +51,17 @@ def visualize_multiple_modes(eigenmodes, N, num_modes=6):
 
 
 N = 20
-modes = 6
+modes = 7
 
 diag_M = diagonal_matrix(N)
 
-# Each eigenvector column is a mode
-
+# # Each eigenvector column is a mode
 eigenvalues, eigenvectors = scipy.linalg.eigh(diag_M)
 
-# Only take smallest number and each eigenvector column is a mode so 
-# need similar nr of columns 
+# # Only take smallest number and each eigenvector column is a mode so 
+# # need similar nr of columns 
 eigenvalues = eigenvalues[:modes] 
 eigenvectors = eigenvectors[:, :modes]
 eigenmodes = eigenvectors.reshape(N, N, -1)
 
-visualize_multiple_modes(eigenmodes, N, num_modes=6)
+visualize_multiple_modes(eigenmodes, N, modes)
