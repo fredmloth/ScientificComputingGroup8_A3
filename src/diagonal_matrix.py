@@ -3,7 +3,7 @@ import scipy.linalg
 
 import matplotlib.pyplot as plt
 
-def diagonal_matrix(length):
+def diagonal_matrix(N):
     """Creates the Matrix M of the eigenvalue problem. Length is the 
     (length x length) size of a grid."""
 
