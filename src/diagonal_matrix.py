@@ -54,6 +54,28 @@ def visualize_multiple_modes(eigenmodes, N, num_modes=6):
     plt.show()
 
 
+def matrix_grid(grid):
+    """If we need to create a grid for the problem"""
+    return np.pad(grid, 1)
+
+def matrix_vector(matrix, method='row'):
+    """If wee need to make a vector from a grid with boundary conditions"""
+    if method == 'row':
+        vector = matrix.reshape(1, -1)
+
+    elif method == 'column':
+        vector = matrix.reshape(1, -1)
+
+    elif method == '1D array':
+        vector = matrix.ravel()
+
+    else:
+        raise ValueError("Incorrect method parameter, choose: 'row', 'column'"
+            " or '1S array'.")
+
+    return vector
+
+
 N = 20
 modes = 7
 
