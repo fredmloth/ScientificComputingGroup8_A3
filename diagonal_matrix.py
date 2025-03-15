@@ -30,7 +30,7 @@ def diagonal_matrix(length):
     return M  # Scale by step size squared
 
 
-# If plots left on a line, prints empty plots, how to remove?
+
 def visualize_multiple_modes(eigenmodes, N, num_modes=6):
     """Plots eigenmodes"""
 
@@ -39,8 +39,12 @@ def visualize_multiple_modes(eigenmodes, N, num_modes=6):
 
     # Flatten the axes for correct image rendering
     axes = axes.flatten()
+
+    for ax in axes:
+        ax.set_axis_off()
     
     for i in range(num_modes):
+        axes[i].set_axis_on()
         axes[i].imshow(eigenmodes[:, :, i], cmap='bwr', extent=[0, 1, 0, 1])
         axes[i].set_title(f"Mode = {i+1}")
         #axes[i].axis('off')
