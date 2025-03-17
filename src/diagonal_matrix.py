@@ -3,6 +3,7 @@ import scipy.linalg
 
 import matplotlib.pyplot as plt
 
+
 def diagonal_matrix(N):
     """Creates the Matrix M of the eigenvalue problem. Length is the 
     (length x length) size of a grid."""
@@ -31,7 +32,6 @@ def diagonal_matrix(N):
          M[n, n-1] = 0
          M[n-1, n] = 0 
 
-
     return M  # Scale by step size squared
 
 
@@ -53,7 +53,7 @@ def visualize_diag_matrix(M, N, text='ON'):
     return fig
 
 
-def visualize_multiple_modes(eigenmodes, N, num_modes=6):
+def visualize_multiple_modes(eigenmodes, eigenvalues, N, num_modes=6):
     """Plots eigenmodes"""
 
     horizontal = ((num_modes // 3) +(num_modes % 3))
@@ -68,7 +68,7 @@ def visualize_multiple_modes(eigenmodes, N, num_modes=6):
     for i in range(num_modes):
         axes[i].set_axis_on()
         axes[i].imshow(eigenmodes[:, :, i], cmap='bwr', extent=[0, 1, 0, 1])
-        axes[i].set_title(f"Mode = {i+1}")
+        axes[i].set_title(f"Mode = {i+1}, Eigenvalue = {eigenvalues[i]:.3f}")
         #axes[i].axis('off')
 
     #plt.colorbar(label='Amplitude')
@@ -98,25 +98,16 @@ def matrix_vector(matrix, method='row'):
     return vector
 
 
-def get_eigenmodes(M, N, modes):
-    # # Each eigenvector column is a mode
+def get_eigenmodes(M, N, modes=6):
+
+    # Each eigenvector column is a mode
     eigenvalues, eigenvectors = scipy.linalg.eigh(M)
+    sorted_eig = np.argsort(np.abs(eigenvalues))[:modes]
 
-    # # Only take smallest number and each eigenvector column is a mode so 
-    # # need similar nr of columns 
-    eigenvalues = eigenvalues[:modes] 
-    eigenvectors = abs(eigenvectors[:, :modes])
+    # Only take smallest number and each eigenvector column is a mode so 
+    # need similar nr of columns
+    eigenvectors = eigenvectors[:, sorted_eig]
+    eigenvalues = eigenvalues[sorted_eig]
     eigenmodes = eigenvectors.reshape(N, N, -1)
-
-    return eigenmodes
-
-# N = 4
-# modes = 6
-
-# diag_M = diagonal_matrix(N)
-# fig = visualize_diag_matrix(diag_M, N)
-
-# eigenmodes = get_eigenmodes(diag_M, modes)
-# visualize_multiple_modes(eigenmodes, N, modes)
-
-
+    
+    return eigenvalues, eigenvectors, sorted_eig, eigenmodes
