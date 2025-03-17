@@ -35,15 +35,20 @@ def diagonal_matrix(N):
     return M  # Scale by step size squared
 
 
-def visualize_diag_matrix(M, N):
-    fig, ax = plt.subplots(figsize=(6, 6))
+def visualize_diag_matrix(M, N, text='ON'):
+    fig, ax = plt.subplots(figsize=(8, 8))
     
-    ax.matshow(M, cmap='tab10')
+    ax.matshow(M, cmap='viridis')
 
-    for i in range(N*N):
-        for j in range(N*N):
-            c = M[j, i]
-            ax.text(i, j, int(c), va='center', ha='center')
+    # Should turn off for higher values
+    if text == 'ON':
+        for i in range(N*N):
+            for j in range(N*N):
+                c = M[j, i]
+                if c == -4:
+                    ax.text(i, j, int(c), va='center', ha='center', c='white')
+                elif c == 1:
+                    ax.text(i, j, int(c), va='center', ha='center')
 
     return fig
 
@@ -93,22 +98,25 @@ def matrix_vector(matrix, method='row'):
     return vector
 
 
-N = 4
-modes = 6
+def get_eigenmodes(M, N, modes):
+    # # Each eigenvector column is a mode
+    eigenvalues, eigenvectors = scipy.linalg.eigh(M)
 
-diag_M = diagonal_matrix(N)
-fig = visualize_diag_matrix(diag_M, N)
+    # # Only take smallest number and each eigenvector column is a mode so 
+    # # need similar nr of columns 
+    eigenvalues = eigenvalues[:modes] 
+    eigenvectors = abs(eigenvectors[:, :modes])
+    eigenmodes = eigenvectors.reshape(N, N, -1)
+
+    return eigenmodes
+
+# N = 4
+# modes = 6
+
+# diag_M = diagonal_matrix(N)
+# fig = visualize_diag_matrix(diag_M, N)
+
+# eigenmodes = get_eigenmodes(diag_M, modes)
+# visualize_multiple_modes(eigenmodes, N, modes)
 
 
-
-# # Each eigenvector column is a mode
-#eigenvalues, eigenvectors = scipy.linalg.eigh(diag_M)
-
-# # Only take smallest number and each eigenvector column is a mode so 
-# # need similar nr of columns 
-#eigenvalues = eigenvalues[:modes] 
-#eigenvectors = abs(eigenvectors[:, :modes])
-#eigenmodes = eigenvectors.reshape(N, N, -1)
-#visualize_diag_matrix(diag_M, N)
-
-#visualize_multiple_modes(eigenmodes, N, modes)
