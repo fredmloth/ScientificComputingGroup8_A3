@@ -27,8 +27,25 @@ def diagonal_matrix(N):
         if i - N >= 0:  # Top neighbor
             M[i, i - N] = 1
 
+    for n in range(N, size, N):
+         M[n, n-1] = 0
+         M[n-1, n] = 0 
+
+
     return M  # Scale by step size squared
 
+
+def visualize_diag_matrix(M, N):
+    fig, ax = plt.subplots(figsize=(6, 6))
+    
+    ax.matshow(M, cmap='tab10')
+
+    for i in range(N*N):
+        for j in range(N*N):
+            c = M[j, i]
+            ax.text(i, j, int(c), va='center', ha='center')
+
+    return fig
 
 
 def visualize_multiple_modes(eigenmodes, N, num_modes=6):
@@ -76,18 +93,22 @@ def matrix_vector(matrix, method='row'):
     return vector
 
 
-N = 20
-modes = 7
+N = 4
+modes = 6
 
 diag_M = diagonal_matrix(N)
+fig = visualize_diag_matrix(diag_M, N)
+
+
 
 # # Each eigenvector column is a mode
-eigenvalues, eigenvectors = scipy.linalg.eigh(diag_M)
+#eigenvalues, eigenvectors = scipy.linalg.eigh(diag_M)
 
 # # Only take smallest number and each eigenvector column is a mode so 
 # # need similar nr of columns 
-eigenvalues = eigenvalues[:modes] 
-eigenvectors = eigenvectors[:, :modes]
-eigenmodes = eigenvectors.reshape(N, N, -1)
+#eigenvalues = eigenvalues[:modes] 
+#eigenvectors = abs(eigenvectors[:, :modes])
+#eigenmodes = eigenvectors.reshape(N, N, -1)
+#visualize_diag_matrix(diag_M, N)
 
-visualize_multiple_modes(eigenmodes, N, modes)
+#visualize_multiple_modes(eigenmodes, N, modes)
