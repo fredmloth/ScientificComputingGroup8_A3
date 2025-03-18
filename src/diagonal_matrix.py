@@ -149,7 +149,7 @@ def circular_domain(L):
 
 
 def test_domain(grid):
-    fig, ax = plt.subplots(figsize=(8, 8))
+    fig, ax = plt.subplots(figsize=(6, 6))
     
     ax.matshow(grid, cmap='viridis')
 
@@ -172,7 +172,6 @@ def diagonal_circle(grid, diag_M, N):
     cols_to_keep = ~np.all(diag_M == 3, axis=0)
 
     filtered_matrix = diag_M[rows_to_keep, :][:, cols_to_keep]
-    print(filtered_matrix)
 
     return filtered_matrix
 
@@ -202,7 +201,6 @@ def diagonal_rectangular(L):
         M[n, n-1] = 0
         M[n-1, n] = 0 
 
-    print(M)
     return M
 
 
@@ -219,3 +217,8 @@ diag_M = diagonal_rectangular(N)
 #new_diag = np.deepcopy(diag_M)
 
 
+diag_M = diagonal_matrix(N)
+
+#rectangular_domain(L=4)
+grid = circular_domain(N)
+test_domain(grid)
