@@ -1,12 +1,8 @@
 import numpy as np
 import scipy.linalg
-
-
 import scipy.sparse
 import scipy.sparse.linalg
-
 import time
-
 import matplotlib.pyplot as plt
 
 
