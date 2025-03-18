@@ -80,6 +80,7 @@ def matrix_grid(grid):
     """If we need to create a grid for the problem"""
     return np.pad(grid, 1)
 
+
 def matrix_vector(matrix, method='row'):
     """If wee need to make a vector from a grid with boundary conditions"""
     if method == 'row':
@@ -111,3 +112,19 @@ def get_eigenmodes(M, N, modes=6):
     eigenmodes = eigenvectors.reshape(N, N, -1)
     
     return eigenvalues, eigenvectors, sorted_eig, eigenmodes
+
+
+def rectangular_domain(L):
+    """The rectangle's 2L side is assumed to be horizontal"""
+    if L % 2 != 0:
+        raise ValueError("L must be an integer divided by two, improper borders.")
+    
+    grid = np.zeros((2*L, 2*L))
+    grid[:, :] = False
+    L_half = int(L / 2)
+    grid[L_half:-L_half, :] = True
+
+    return grid
+
+
+rectangular_domain(L=4)
