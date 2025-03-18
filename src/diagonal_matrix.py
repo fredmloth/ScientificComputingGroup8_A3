@@ -130,19 +130,19 @@ def rectangular_domain(L):
     return grid
 
 
-def circular_domain(L):
+def circular_domain(N):
     """Circular domain according to the leuclidian domain.
     If L is even, the center (L//2, L//2) falls on the corner of four pixels.
     If L is odd, the center is directly on a single pixel, making the circle more symmetric.
     """
 
-    grid = np.zeros((L, L))
+    grid = np.zeros((N, N))
     grid[:, :] = False
     
-    radius = int(L // 2)
-    center = (L // 2, L//2)
+    radius = (N / 2)
+    center = (N // 2, N//2)
 
-    y,x = np.ogrid[:L,:L]
+    y,x = np.ogrid[:N, :N]
 
     mask = (x-center[0])**2 + (y-center[1])**2 <= radius**2
 
