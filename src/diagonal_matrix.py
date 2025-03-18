@@ -117,7 +117,8 @@ def get_eigenmodes(M, N, modes=6):
 def rectangular_domain(L):
     """The rectangle's 2L side is assumed to be horizontal"""
     if L % 2 != 0:
-        raise ValueError("L must be an integer divided by two, improper borders.")
+        raise ValueError("L must be an integer divided by two, improper "
+            "borders.")
     
     grid = np.zeros((2*L, 2*L))
     grid[:, :] = False
@@ -127,4 +128,26 @@ def rectangular_domain(L):
     return grid
 
 
-rectangular_domain(L=4)
+def circular_domain(L):
+    # if L % 2 != 0:
+    #     raise ValueError("L divided by 2 must be an integer, improper "
+    #         "borders.")
+
+    grid = np.zeros((L, L))
+    
+    radius = int(L // 2)
+    center = (L // 2, L//2)
+
+    y,x = np.ogrid[:L,:L]
+
+    mask = (x-center[0])**2+(y-center[1])**2 <= radius**2
+
+    grid[mask]=1
+
+    print(grid)
+    return grid
+
+    
+
+#rectangular_domain(L=4)
+circular_domain(L=11)
