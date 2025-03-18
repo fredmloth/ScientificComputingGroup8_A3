@@ -157,6 +157,25 @@ def test_domain(grid):
     return
     
 
+def filter_diagonal(grid, diag_M, N):
+
+    for i in range(N):
+        for j in range(N):
+            if grid[i][j] == False:
+                index = i * N + j
+
+                diag_M[index, :] = 3
+                diag_M[:, index] = 3
+
+    # Flip True/False to remove correct cols and rows
+    rows_to_keep = ~np.all(diag_M == 3, axis=1)
+    cols_to_keep = ~np.all(diag_M == 3, axis=0)
+
+    filtered_matrix = diag_M[rows_to_keep, :][:, cols_to_keep]
+
+    return filtered_diagonal
+
+
 N = 3
 
 diag_M = diagonal_matrix(N)
@@ -166,16 +185,4 @@ grid = circular_domain(N)
 test_domain(grid)
 #new_diag = np.deepcopy(diag_M)
 
-for i in range(N):
-    for j in range(N):
-        if grid[i][j] == False:
-            index = i * N + j
 
-            diag_M[index, :] = 3
-            diag_M[:, index] = 3
-
-
-
-
-
-print(diag_M)
