@@ -101,6 +101,7 @@ def matrix_vector(matrix, method='row'):
 
 def get_eigenmodes(M, N, modes=6):
 
+    dx = 1/N
     # Each eigenvector column is a mode
     eigenvalues, eigenvectors = scipy.linalg.eigh(M)
     sorted_eig = np.argsort(np.abs(eigenvalues))[:modes]
@@ -109,6 +110,7 @@ def get_eigenmodes(M, N, modes=6):
     # need similar nr of columns
     eigenvectors = eigenvectors[:, sorted_eig]
     eigenvalues = eigenvalues[sorted_eig]
+    eigenvalues = eigenvalues / (dx**2)
     eigenmodes = eigenvectors.reshape(N, N, -1)
     
     return eigenvalues, eigenvectors, sorted_eig, eigenmodes
@@ -206,10 +208,12 @@ def diagonal_rectangular(L):
 
 def get_eigenmodes_rectangular(M, N, modes=6):
     """Eigenmodes for rectangle"""
+    dx = 1/N
     eigenvalues, eigenvectors = scipy.linalg.eigh(M)
     sorted_eig = np.argsort(np.abs(eigenvalues))[:modes]
     eigenvectors = eigenvectors[:, sorted_eig]
     eigenvalues = eigenvalues[sorted_eig]
+    eigenvalues = eigenvalues / (dx**2)
 
     # Reshape eigenmodes for rectangule (L x 2L)
     eigenmodes = eigenvectors.reshape(N, 2*N, -1)
@@ -219,10 +223,12 @@ def get_eigenmodes_rectangular(M, N, modes=6):
 
 def get_eigenmodes_circular(M, grid, N, modes=6):
     """Eigenmodes for circular grid"""
+    dx = 1/N
     eigenvalues, eigenvectors = scipy.linalg.eigh(M)
     sorted_eig = np.argsort(np.abs(eigenvalues))[:modes]
     eigenvectors = eigenvectors[:, sorted_eig]
     eigenvalues = eigenvalues[sorted_eig]
+    eigenvalues = eigenvalues / (dx**2)
 
     # Create an empty 3D array to store eigenmodes in the circular shape
     eigenmodes = np.zeros((N, N, modes))
