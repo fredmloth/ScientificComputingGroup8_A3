@@ -205,46 +205,36 @@ def diagonal_rectangular(L):
 
 
 def get_eigenmodes_rectangular(M, N, modes=6):
+    """Eigenmodes for rectangle"""
     eigenvalues, eigenvectors = scipy.linalg.eigh(M)
     sorted_eig = np.argsort(np.abs(eigenvalues))[:modes]
     eigenvectors = eigenvectors[:, sorted_eig]
     eigenvalues = eigenvalues[sorted_eig]
 
     # Reshape eigenmodes for rectangule (L x 2L)
-    eigenmodes = eigenvectors.reshape(L, 2*L, -1)
+    eigenmodes = eigenvectors.reshape(N, 2*N, -1)
     
     return eigenvalues, eigenvectors, sorted_eig, eigenmodes
 
-def get_eigenmodes_circular(M, N, modes=6):
 
-    # Each eigenvector column is a mode
+def get_eigenmodes_circular(M, grid, N, modes=6):
+    """Eigenmodes for circular grid"""
     eigenvalues, eigenvectors = scipy.linalg.eigh(M)
     sorted_eig = np.argsort(np.abs(eigenvalues))[:modes]
-
-    # Only take smallest number and each eigenvector column is a mode so 
-    # need similar nr of columns
     eigenvectors = eigenvectors[:, sorted_eig]
     eigenvalues = eigenvalues[sorted_eig]
-    eigenmodes = eigenvectors.reshape(N, N, -1)
+
+    # Create an empty 3D array to store eigenmodes in the circular shape
+    eigenmodes = np.zeros((N, N, modes))
+
+    # Get indexes of True grid
+    indexes = np.where(grid)
+
+    for i in range(modes):
+        mode_vector = eigenvectors[:, i]
+        mode_grid = np.zeros((N, N))
+        mode_grid[indexes] = mode_vector
+
+        eigenmodes[:, :, i] = mode_grid
     
     return eigenvalues, eigenvectors, sorted_eig, eigenmodes
-
-
-N = 4
-
-diag_M = diagonal_rectangular(N)
-
-#rectangular_domain(L=4)
-#grid = rectangular_domain(N)
-#test_domain(grid)
-
-#filter_diagonal(grid, diag_M, N)
-
-#new_diag = np.deepcopy(diag_M)
-
-
-diag_M = diagonal_matrix(N)
-
-#rectangular_domain(L=4)
-grid = circular_domain(N)
-test_domain(grid)
