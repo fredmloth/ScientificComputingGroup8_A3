@@ -129,9 +129,13 @@ def rectangular_domain(L):
 
 
 def circular_domain(L):
-    """Circular domain according to the leuclidian domain."""
+    """Circular domain according to the leuclidian domain.
+    If L is even, the center (L//2, L//2) falls on the corner of four pixels.
+    If L is odd, the center is directly on a single pixel, making the circle more symmetric.
+    """
 
     grid = np.zeros((L, L))
+    grid[:, :] = False
     
     radius = int(L // 2)
     center = (L // 2, L//2)
@@ -140,7 +144,7 @@ def circular_domain(L):
 
     mask = (x-center[0])**2 + (y-center[1])**2 <= radius**2
 
-    grid[mask]=1
+    grid[mask] = True
     return grid
 
 
@@ -153,6 +157,25 @@ def test_domain(grid):
     return
     
 
+N = 3
+
+diag_M = diagonal_matrix(N)
+
 #rectangular_domain(L=4)
-grid = circular_domain(L=102)
+grid = circular_domain(N)
 test_domain(grid)
+#new_diag = np.deepcopy(diag_M)
+
+for i in range(N):
+    for j in range(N):
+        if grid[i][j] == False:
+            index = i * N + j
+
+            diag_M[index, :] = 3
+            diag_M[:, index] = 3
+
+
+
+
+
+print(diag_M)
