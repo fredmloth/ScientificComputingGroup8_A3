@@ -129,9 +129,7 @@ def rectangular_domain(L):
 
 
 def circular_domain(L):
-    # if L % 2 != 0:
-    #     raise ValueError("L divided by 2 must be an integer, improper "
-    #         "borders.")
+    """Circular domain according to the leuclidian domain."""
 
     grid = np.zeros((L, L))
     
@@ -140,14 +138,22 @@ def circular_domain(L):
 
     y,x = np.ogrid[:L,:L]
 
-    mask = (x-center[0])**2+(y-center[1])**2 <= radius**2
+    mask = (x-center[0])**2 + (y-center[1])**2 <= radius**2
 
     grid[mask]=1
 
     print(grid)
     return grid
 
+def test_domain(grid):
+    fig, ax = plt.subplots(figsize=(8, 8))
+    
+    ax.matshow(grid, cmap='viridis')
+
+    plt.show()
+    return
     
 
 #rectangular_domain(L=4)
-circular_domain(L=11)
+grid = circular_domain(L=102)
+test_domain(grid)
