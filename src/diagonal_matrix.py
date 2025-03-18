@@ -204,6 +204,32 @@ def diagonal_rectangular(L):
     return M
 
 
+def get_eigenmodes_rectangular(M, N, modes=6):
+    eigenvalues, eigenvectors = scipy.linalg.eigh(M)
+    sorted_eig = np.argsort(np.abs(eigenvalues))[:modes]
+    eigenvectors = eigenvectors[:, sorted_eig]
+    eigenvalues = eigenvalues[sorted_eig]
+
+    # Reshape eigenmodes for rectangule (L x 2L)
+    eigenmodes = eigenvectors.reshape(L, 2*L, -1)
+    
+    return eigenvalues, eigenvectors, sorted_eig, eigenmodes
+
+def get_eigenmodes_circular(M, N, modes=6):
+
+    # Each eigenvector column is a mode
+    eigenvalues, eigenvectors = scipy.linalg.eigh(M)
+    sorted_eig = np.argsort(np.abs(eigenvalues))[:modes]
+
+    # Only take smallest number and each eigenvector column is a mode so 
+    # need similar nr of columns
+    eigenvectors = eigenvectors[:, sorted_eig]
+    eigenvalues = eigenvalues[sorted_eig]
+    eigenmodes = eigenvectors.reshape(N, N, -1)
+    
+    return eigenvalues, eigenvectors, sorted_eig, eigenmodes
+
+
 N = 4
 
 diag_M = diagonal_rectangular(N)
