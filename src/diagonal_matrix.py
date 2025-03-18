@@ -120,7 +120,7 @@ def rectangular_domain(L):
         raise ValueError("L must be an integer divided by two, improper "
             "borders.")
     
-    grid = np.zeros((2*L, 2*L))
+    grid = np.zeros((L, 2*L))
     grid[:, :] = False
     L_half = int(L / 2)
     grid[L_half:-L_half, :] = True
@@ -157,8 +157,8 @@ def test_domain(grid):
     return
     
 
-def filter_diagonal(grid, diag_M, N):
-
+def diagonal_circle(grid, diag_M, N):
+    """Filters the diagonal for a matrix that is not a square"""
     for i in range(N):
         for j in range(N):
             if grid[i][j] == False:
@@ -172,17 +172,50 @@ def filter_diagonal(grid, diag_M, N):
     cols_to_keep = ~np.all(diag_M == 3, axis=0)
 
     filtered_matrix = diag_M[rows_to_keep, :][:, cols_to_keep]
+    print(filtered_matrix)
 
-    return filtered_diagonal
+    return filtered_matrix
 
 
-N = 3
+def diagonal_rectangular(L):
+    N = (2*L)
+    size = L * N
 
-diag_M = diagonal_matrix(N)
+    M = np.zeros((size, size))
+
+    for i in range(size):
+        M[i, i] = -4  # Center point
+
+        if (i + 1) % N != 0:  # Right 
+            M[i, i + 1] = 1
+        
+        if i % N != 0:  # Left 
+            M[i, i - 1] = 1
+
+        if i + N < size:  # Bottom 
+            M[i, i + N] = 1
+
+        if i - N >= 0:  # Top 
+            M[i, i - N] = 1
+
+    for n in range(N, size, N):
+        M[n, n-1] = 0
+        M[n-1, n] = 0 
+
+    print(M)
+    return M
+
+
+N = 4
+
+diag_M = diagonal_rectangular(N)
 
 #rectangular_domain(L=4)
-grid = circular_domain(N)
-test_domain(grid)
+#grid = rectangular_domain(N)
+#test_domain(grid)
+
+#filter_diagonal(grid, diag_M, N)
+
 #new_diag = np.deepcopy(diag_M)
 
 
