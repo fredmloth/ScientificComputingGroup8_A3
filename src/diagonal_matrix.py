@@ -141,9 +141,8 @@ def circular_domain(L):
     mask = (x-center[0])**2 + (y-center[1])**2 <= radius**2
 
     grid[mask]=1
-
-    print(grid)
     return grid
+
 
 def test_domain(grid):
     fig, ax = plt.subplots(figsize=(8, 8))
