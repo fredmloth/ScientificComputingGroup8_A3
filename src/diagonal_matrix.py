@@ -1,6 +1,12 @@
 import numpy as np
 import scipy.linalg
 
+
+import scipy.sparse
+import scipy.sparse.linalg
+
+import time
+
 import matplotlib.pyplot as plt
 
 
@@ -244,3 +250,51 @@ def get_eigenmodes_circular(M, grid, N, modes=6):
         eigenmodes[:, :, i] = mode_grid
     
     return eigenvalues, eigenvectors, sorted_eig, eigenmodes
+
+
+def get_eigenmodes_sparse_rectangle(M, N, modes=6):
+    """Eigenmodes for sparse matrix"""
+    dx = 1/N
+    M_sparse = scipy.sparse.csr_matrix(M)
+    eigenvalues, eigenvectors = scipy.sparse.linalg.eigs(M_sparse, 
+        k=modes, which='SM')
+
+    eigenvalues = eigenvalues / (dx**2)
+
+    # Reshape eigenmodes for rectangle (L x 2L)
+    eigenmodes = eigenvectors.reshape(N, 2 * N, -1)
+
+    return eigenvalues, eigenvectors, eigenmodes
+
+
+def get_eigenmodes_sparse_square(M, N, modes=6):
+    """Eigenmodes for sparse matrix"""
+    dx = 1/N
+    M_sparse = scipy.sparse.csr_matrix(M)
+    eigenvalues, eigenvectors = scipy.sparse.linalg.eigs(M_sparse, 
+        k=modes, which='SM')
+
+    eigenvalues = eigenvalues / (dx**2)
+
+    eigenmodes = eigenvectors.reshape(N, N, -1)
+
+    return eigenvalues, eigenvectors, eigenmodes
+
+def get_eigenmodes_sparse_circular(M, grid, N, modes=6):
+    dx = 1/N
+    M_sparse = scipy.sparse.csr_matrix(M)
+    eigenvalues, eigenvectors = scipy.sparse.linalg.eigs(M_sparse, 
+        k=modes, which='SM')
+
+    eigenvalues = eigenvalues / (dx**2)
+
+    eigenmodes = np.zeros((N, N, modes))
+    indexes = np.where(grid)
+
+    for i in range(modes):
+        mode_vector = eigenvectors[:, i]
+        mode_grid = np.zeros((N, N))
+        mode_grid[indexes] = np.real(mode_vector)
+        eigenmodes[:, :, i] = mode_grid
+
+    return eigenvalues, eigenvectors, eigenmodes
