@@ -247,22 +247,6 @@ def get_eigenmodes_circular(M, grid, N, modes=6):
     
     return eigenvalues, eigenvectors, sorted_eig, eigenmodes
 
-
-def get_eigenmodes_sparse_rectangle(M, N, modes=6):
-    """Eigenmodes for sparse matrix"""
-    dx = 1/N
-    M_sparse = scipy.sparse.csr_matrix(M)
-    eigenvalues, eigenvectors = scipy.sparse.linalg.eigs(M_sparse, 
-        k=modes, which='SM')
-
-    eigenvalues = eigenvalues / (dx**2)
-
-    # Reshape eigenmodes for rectangle (L x 2L)
-    eigenmodes = eigenvectors.reshape(N, 2 * N, -1)
-
-    return eigenvalues, eigenvectors, eigenmodes
-
-
 def get_eigenmodes_sparse_square(M, N, modes=6):
     """Eigenmodes for sparse matrix"""
     dx = 1/N
@@ -273,6 +257,20 @@ def get_eigenmodes_sparse_square(M, N, modes=6):
     eigenvalues = eigenvalues / (dx**2)
 
     eigenmodes = eigenvectors.reshape(N, N, -1)
+
+    return eigenvalues, eigenvectors, eigenmodes
+
+def get_eigenmodes_sparse_rectangular(M, N, modes=6):
+    """Eigenmodes for sparse matrix"""
+    dx = 1/N
+    M_sparse = scipy.sparse.csr_matrix(M)
+    eigenvalues, eigenvectors = scipy.sparse.linalg.eigs(M_sparse, 
+        k=modes, which='SM')
+
+    eigenvalues = eigenvalues / (dx**2)
+
+    # Reshape eigenmodes for rectangle (L x 2L)
+    eigenmodes = eigenvectors.reshape(N, 2 * N, -1)
 
     return eigenvalues, eigenvectors, eigenmodes
 
@@ -294,3 +292,68 @@ def get_eigenmodes_sparse_circular(M, grid, N, modes=6):
         eigenmodes[:, :, i] = mode_grid
 
     return eigenvalues, eigenvectors, eigenmodes
+
+def eigenfreqs_lengths_square(L_lengths, modes=6):
+    L_eigenfreqs = []
+    for length in L_lengths:
+        diag_M = diagonal_matrix(length)
+
+        eigenfreqs, _, _ = get_eigenmodes_sparse_square(diag_M, length, modes)
+        L_eigenfreqs.append(eigenfreqs)
+    return L_eigenfreqs
+        
+
+def eigenfreqs_lengths_rectangle(L_lengths,modes=6):
+    L_eigenfreqs = []
+    for length in L_lengths:
+        diag_M = diagonal_matrix(length)
+
+        eigenfreqs, _, _ = get_eigenmodes_sparse_rectangular(diag_M, length, modes)
+        L_eigenfreqs.append(eigenfreqs)
+    return L_eigenfreqs
+
+def eigenfreqs_lengths_circular(L_lengths,modes=6):
+    L_eigenfreqs = []
+    for length in L_lengths:
+        diag_M = diagonal_matrix(length)
+        grid = circular_domain(length)
+        diag_M = diagonal_circle(grid, diag_M, length) 
+
+        eigenfreqs, _, _ = get_eigenmodes_sparse_circular(diag_M, grid, length, modes)
+        L_eigenfreqs.append(eigenfreqs)
+    return L_eigenfreqs
+
+def visualise_eigenfreqs_lengths(lengths, LL_eigenfreqs):
+    """Plots the eigenfrequencies for different values of N for all three
+    domain shapes.
+    
+    Parameters:
+    - lengths (list[int]): The list of lengths for which the eigenfrequencies
+      have been calculated.
+    - LL_eigenfreqs (list[list[float]]): A list with the calculated
+      eigenfrequencies for each of the three shapes"""
+
+    fig, axes = plt.subplots(1, 3, figsize=(12, 4))
+
+    # Flatten the axes for correct image rendering
+    axes = axes.flatten()
+
+    for ax in axes:
+        ax.set_axis_off()
+    
+    L_lengths = [[x]*6 for x in lengths]
+    domain_shapes = ["Square", "Rectangular", "Circular"]
+    for i in range(len(domain_shapes)):
+        axes[i].set_axis_on()
+        for j in range(len(L_lengths)):
+            axes[i].scatter(L_lengths[j], LL_eigenfreqs[i][j])
+        axes[i].set_xlim(0,max(lengths)+10)
+        axes[i].set_ylim(-150,0)
+        axes[i].set_xlabel("length")
+        axes[i].set_ylabel("eigenfrequencies")
+        axes[i].set_title(f"Shape = {domain_shapes[i]}")
+        #axes[i].axis('off')
+
+    #plt.colorbar(label='Amplitude')
+    plt.tight_layout()
+    plt.show()
