@@ -1,5 +1,3 @@
-# doesn't really work (sorta does?) and i have no idea if im going in the right direction at all
-
 import matplotlib.pyplot as plt
 import numpy as np
 import diagonal_matrix as dm
