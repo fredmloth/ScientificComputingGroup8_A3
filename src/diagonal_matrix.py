@@ -4,6 +4,7 @@ import scipy.sparse
 import scipy.sparse.linalg
 import time
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 
 def diagonal_matrix(N):
@@ -346,7 +347,7 @@ def visualise_eigenfreqs_lengths(lengths, LL_eigenfreqs):
     for i in range(len(domain_shapes)):
         axes[i].set_axis_on()
         for j in range(len(L_lengths)):
-            axes[i].scatter(L_lengths[j], LL_eigenfreqs[i][j])
+            axes[i].scatter(L_lengths[j], LL_eigenfreqs[i][j], alpha=0.5)
         axes[i].set_xlim(0,max(lengths)+10)
         axes[i].set_ylim(-150,0)
         axes[i].set_xlabel("length")
@@ -357,3 +358,24 @@ def visualise_eigenfreqs_lengths(lengths, LL_eigenfreqs):
     #plt.colorbar(label='Amplitude')
     plt.tight_layout()
     plt.show()
+
+def time_dependent_animation_square(eigenmode, eigenval, time=1, step=0.01, A=1, B=1, c=1):
+    """"""
+
+    fig, ax = plt.subplots()
+    im = ax.imshow(eigenmode, cmap="bwr", vmin=-0.1, vmax=0.1)
+
+    # Store precomputed frames
+    ims = []
+    for t in np.arange(0+step, time, step):
+        u = eigenmode * (A*np.cos(c*eigenval*t)+B*np.sin(c*eigenval*t))
+        im_ = ax.imshow(u, cmap="bwr", animated=True, vmin=-0.1, vmax=0.1)
+        ims.append([im_])
+
+    # Use ArtistAnimation
+    ani = animation.ArtistAnimation(fig, ims, interval=100, blit=True)
+
+    # Close the figure to not display in the notebook
+    plt.close(fig)
+
+    return ani
