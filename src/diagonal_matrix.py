@@ -87,12 +87,6 @@ def diagonal_rectangle(grid, diag_M, L):
     return filtered_matrix
 
 
-def rectangular_domain(L):
-    # shape (L, 2L)
-    grid = np.ones((L, 2*L), dtype=bool)
-    return grid
-
-
 def diagonal_circle(grid, diag_M, N):
     """Filters the diagonal for a matrix that is not a square"""
     for i in range(N):
@@ -110,8 +104,6 @@ def diagonal_circle(grid, diag_M, N):
     filtered_matrix = diag_M[rows_to_keep, :][:, cols_to_keep]
 
     return filtered_matrix
-
-
 
 
 def visualize_diag_matrix(M, N, text='ON'):
@@ -149,9 +141,7 @@ def visualize_multiple_modes(eigenmodes, eigenvalues, N, num_modes=6):
         axes[i].set_axis_on()
         axes[i].imshow(eigenmodes[:, :, i], cmap='bwr', extent=[0, 1, 0, 1], vmin = -max, vmax = max)
         axes[i].set_title(f"Mode = {i+1}, Eigenvalue = {eigenvalues[i]}")
-        #axes[i].axis('off')
 
-    #plt.colorbar(label='Amplitude')
     plt.tight_layout()
     plt.show()
 
@@ -300,19 +290,36 @@ def get_eigenmodes_sparse_square(M, N, modes=6):
 
     return eigenvalues, eigenvectors, eigenmodes
 
+import numpy as np
+import scipy.sparse
+import scipy.sparse.linalg
+
 def get_eigenmodes_sparse_rectangular(M, N, modes=6):
-    """Eigenmodes for sparse matrix"""
-    dx = (1 /2*N)
-
+    """
+    """
+    dx = 1.0 / N 
+    
     M_sparse = scipy.sparse.csr_matrix(M)
-    eigenvalues, eigenvectors = scipy.sparse.linalg.eigs(M_sparse, 
-        k=modes, which='SM')
-    eigenvalues /= dx**2
+    
+    # Compute the k smallest eigenvalues in magnitude
+    vals, vecs = scipy.sparse.linalg.eigs(M_sparse, k=modes, which='SM')
+    
+    # Convert to real (small floating imaginary parts can exist)
+    vals = np.real(vals)
+    vecs = np.real(vecs)
+    
+    # Sort by ascending magnitude
+    idx_sort = np.argsort(np.abs(vals))
+    vals = vals[idx_sort]
+    vecs = vecs[:, idx_sort]
+    vals = vals[:modes]
+    vecs = vecs[:, :modes]
+    
+    vals /= dx**2
+    eigenmodes = vecs.reshape(N, 2*N, modes)
 
-    # Reshape eigenmodes for rectangle (L x 2L)
-    eigenmodes = eigenvectors.reshape(N, 2 * N, -1)
+    return vals, vecs, eigenmodes
 
-    return eigenvalues, eigenvectors, eigenmodes
 
 def get_eigenmodes_sparse_circular(M, grid, N, modes=6):
     dx = (1 / N)
@@ -446,7 +453,7 @@ def time_dependent_animation_square(eigenmode, eigenval, time=1, step=0.01, A=1,
 
 
 def visualize_all_eigenfrequencies(N, modes=5):
-    fig, axes = plt.subplots(3, 5, figsize=(12,8))
+    fig, axes = plt.subplots(3, 5, figsize=(15,5))
     axes = axes.flatten()
 
     # Square grid
@@ -492,22 +499,42 @@ def visualize_all_eigenfrequencies(N, modes=5):
 
     #plt.tight_layout()
     plt.show()
-    fig.savefig("results/eigenfrequencies.png", dpi=300)
+    fig.savefig("results/eigenfrequencies.pdf", dpi=300)
 
     return plt
 
 
-
-
-def matrix_grid(grid):
-    """If we need to create a grid for the problem"""
-    return np.pad(grid, 1)
-
-
-def test_domain(grid):
-    fig, ax = plt.subplots(figsize=(6, 6))
+def visualize_diag_matrix(M, N, text='ON'):
+    fig, ax = plt.subplots(figsize=(8, 8))
     
-    ax.matshow(grid, cmap='viridis')
+    ax.matshow(M, cmap='viridis')
 
+
+def visualize_all_diagonals(N):
+    M_sq = diagonal_matrix(N)
+
+    M_r = diagonal_rectangular(N)
+
+    M_c = diagonal_matrix(N)
+    grid = circular_domain(N)
+    M_c = diagonal_circle(grid, M_c, N)
+
+    fig, axes = plt.subplots(1, 3, figsize=(10,6))
+    axes = axes.flatten()
+
+    axes[0].matshow(M_sq, cmap='viridis')
+    axes[0].set_title("Square Domain")
+    axes[1].matshow(M_r, cmap='viridis')
+    axes[1].set_title("Rectangular Domain")
+    axes[2].matshow(M_c, cmap='viridis')
+    axes[2].set_title("Circular Domain")
+
+    for ax in axes:
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+    plt.tight_layout()
     plt.show()
-    return
+    fig.savefig("results/diagonals.png", dpi=300)
+
+    return plt
