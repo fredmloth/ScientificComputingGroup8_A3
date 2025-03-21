@@ -535,6 +535,6 @@ def visualize_all_diagonals(N):
 
     plt.tight_layout()
     plt.show()
-    fig.savefig("results/diagonals.png", dpi=300)
+    fig.savefig("results/diagonals.pdf", dpi=300)
 
     return plt
