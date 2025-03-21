@@ -343,9 +343,6 @@ def visualise_eigenfreqs_lengths(lengths, LL_eigenfreqs):
 
     # Flatten the axes for correct image rendering
     axes = axes.flatten()
-
-    # for ax in axes:
-    #     ax.set_axis_off()
     
     L_lengths = [[x]*6 for x in lengths]
     domain_shapes = ["Square", "Rectangular", "Circular"]
@@ -385,7 +382,7 @@ def time_dependent_visualise_square(eigenmode, eigenfreq, time=1, num_times=4, A
     plt.tight_layout()
     plt.savefig("results/2Dwave_snapshots.pdf")
 
-def time_dependent_animation_square(eigenmode, eigenfreq, time=1, step=0.01, A=1, B=1, c=1):
+def time_dependent_animation_square(eigenmode, eigenfreq, time=0.01, step=0.0001, A=1, B=1, c=1):
     """"""
     max = np.max(np.abs(eigenmode))
 
