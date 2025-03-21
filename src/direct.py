@@ -125,7 +125,7 @@ def plot_disk_boundary(radius):
     theta = np.linspace(0, 2*np.pi, 100)
     x_boundary = radius * np.cos(theta)
     y_boundary = radius * np.sin(theta)
-    plt.plot(x_boundary, y_boundary, 'k-', linewidth=2)
+    plt.plot(x_boundary, y_boundary, 'white', linewidth=2)
 
 
 def setup_plot_attributes(radius):
@@ -135,14 +135,14 @@ def setup_plot_attributes(radius):
     plt.title('Steady-State Concentration on a Circular Disk', fontsize=18)
     plt.xlabel('x', fontsize=16)
     plt.ylabel('y', fontsize=16)
-    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.grid(False)
 
 def plot_solution(X, Y, C, radius=2.0, source_x=0.6, source_y=1.2):
     """Plot the concentration field of the domain """
 
     plt.figure(figsize=(10, 8))
 
-    contour = plt.contourf(X, Y, C, levels=50, cmap=cm.viridis)
+    contour = plt.contourf(X, Y, C, levels=40, cmap=cm.magma)
     plt.colorbar(contour, label='Concentration')
 
     plot_disk_boundary(radius)
@@ -151,15 +151,5 @@ def plot_solution(X, Y, C, radius=2.0, source_x=0.6, source_y=1.2):
     plt.tight_layout()
     plt.show()
 
-
-
-N = 100  
-radius = 2.0 
-source_x = 0.6
-source_y = 1.2 
-
-X, Y, C = solve_diffusion_direct(N, radius, source_x, source_y)
-
-plot_solution(X, Y, C, radius, source_x, source_y)
 
 
