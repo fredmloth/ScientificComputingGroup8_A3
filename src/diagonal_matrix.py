@@ -69,8 +69,9 @@ def visualize_multiple_modes(eigenmodes, eigenvalues, N, num_modes=6):
         ax.set_axis_off()
     
     for i in range(num_modes):
+        max = np.max(np.abs(eigenmodes[:,:,i]))
         axes[i].set_axis_on()
-        axes[i].imshow(eigenmodes[:, :, i], cmap='bwr', extent=[0, 1, 0, 1])
+        axes[i].imshow(eigenmodes[:, :, i], cmap='bwr', extent=[0, 1, 0, 1], vmin = -max, vmax = max)
         axes[i].set_title(f"Mode = {i+1}, Eigenvalue = {eigenvalues[i]:.3f}")
         #axes[i].axis('off')
 
@@ -359,17 +360,40 @@ def visualise_eigenfreqs_lengths(lengths, LL_eigenfreqs):
     plt.tight_layout()
     plt.show()
 
+def time_dependent_visualise_square(eigenmode, eigenval, time=1, num_times=4, A=1, B=1, c=1):
+    max = np.max(np.abs(eigenmode))
+
+    horizontal = ((num_times // 3) +(num_times % 3))
+    fig, axes = plt.subplots(horizontal, 3, figsize=(12, 4*horizontal))
+    
+    # Flatten the axes for correct image rendering
+    axes = axes.flatten()
+
+    for ax in axes:
+        ax.set_axis_off()
+
+    for i in range(num_times):
+        t = i*(time/num_times)
+        u = eigenmode * (A*np.cos(c*eigenval*t)+B*np.sin(c*eigenval*t))
+        axes[i].imshow(u, cmap="bwr", vmin=-max, vmax=max)
+        axes[i].set_axis_on()
+        axes[i].set_title(f"t={t}")
+
+    plt.tight_layout()
+    plt.show()
+
 def time_dependent_animation_square(eigenmode, eigenval, time=1, step=0.01, A=1, B=1, c=1):
     """"""
+    max = np.max(np.abs(eigenmode))
 
     fig, ax = plt.subplots()
-    im = ax.imshow(eigenmode, cmap="bwr", vmin=-0.1, vmax=0.1)
+    im = ax.imshow(eigenmode, cmap="bwr", vmin=-max, vmax=max)
 
     # Store precomputed frames
     ims = []
     for t in np.arange(0+step, time, step):
         u = eigenmode * (A*np.cos(c*eigenval*t)+B*np.sin(c*eigenval*t))
-        im_ = ax.imshow(u, cmap="bwr", animated=True, vmin=-0.1, vmax=0.1)
+        im_ = ax.imshow(u, cmap="bwr", animated=True, vmin=-max, vmax=max)
         ims.append([im_])
 
     # Use ArtistAnimation
