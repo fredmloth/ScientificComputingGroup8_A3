@@ -358,7 +358,7 @@ def visualise_eigenfreqs_lengths(lengths, LL_eigenfreqs):
 
     #plt.colorbar(label='Amplitude')
     plt.tight_layout()
-    plt.show()
+    plt.savefig("results/2Dwave_sizedifferences.pdf")
 
 def time_dependent_visualise_square(eigenmode, eigenval, time=1, num_times=4, A=1, B=1, c=1):
     max = np.max(np.abs(eigenmode))
@@ -373,27 +373,27 @@ def time_dependent_visualise_square(eigenmode, eigenval, time=1, num_times=4, A=
         ax.set_axis_off()
 
     for i in range(num_times):
-        t = i*(time/num_times)
+        t = i*(time/(num_times-1))
         u = eigenmode * (A*np.cos(c*eigenval*t)+B*np.sin(c*eigenval*t))
-        axes[i].imshow(u, cmap="bwr", vmin=-max, vmax=max)
+        axes[i].imshow(u, cmap="bwr", extent=[0, 1, 0, 1], vmin=-max, vmax=max)
         axes[i].set_axis_on()
-        axes[i].set_title(f"t={t}")
+        axes[i].set_title(f"t={round(t, 4)}")
 
     plt.tight_layout()
-    plt.show()
+    plt.savefig("results/2Dwave_snapshots.pdf")
 
 def time_dependent_animation_square(eigenmode, eigenval, time=1, step=0.01, A=1, B=1, c=1):
     """"""
     max = np.max(np.abs(eigenmode))
 
     fig, ax = plt.subplots()
-    im = ax.imshow(eigenmode, cmap="bwr", vmin=-max, vmax=max)
+    im = ax.imshow(eigenmode, cmap="bwr", extent=[0, 1, 0, 1], vmin=-max, vmax=max)
 
     # Store precomputed frames
     ims = []
     for t in np.arange(0+step, time, step):
         u = eigenmode * (A*np.cos(c*eigenval*t)+B*np.sin(c*eigenval*t))
-        im_ = ax.imshow(u, cmap="bwr", animated=True, vmin=-max, vmax=max)
+        im_ = ax.imshow(u, cmap="bwr", extent=[0, 1, 0, 1], animated=True, vmin=-max, vmax=max)
         ims.append([im_])
 
     # Use ArtistAnimation
