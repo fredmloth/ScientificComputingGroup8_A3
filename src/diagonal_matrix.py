@@ -12,12 +12,13 @@ def diagonal_matrix(N):
     (length x length) size of a grid."""
 
     size = N * N
+    dx = (1 / N)
 
     # Initialize matrix with zeros
     M = np.zeros((size, size))
 
     for i in range(size):
-        M[i, i] = -4  # Center point
+        M[i, i] = (-4)  # Center point
 
         if (i + 1) % N != 0:  # Right neighbor
             M[i, i + 1] = 1
@@ -35,7 +36,7 @@ def diagonal_matrix(N):
          M[n, n-1] = 0
          M[n-1, n] = 0 
 
-    return M  # Scale by step size squared
+    return M / (dx**2)
 
 
 def visualize_diag_matrix(M, N, text='ON'):
@@ -72,7 +73,7 @@ def visualize_multiple_modes(eigenmodes, eigenvalues, N, num_modes=6):
         max = np.max(np.abs(eigenmodes[:,:,i]))
         axes[i].set_axis_on()
         axes[i].imshow(eigenmodes[:, :, i], cmap='bwr', extent=[0, 1, 0, 1], vmin = -max, vmax = max)
-        axes[i].set_title(f"Mode = {i+1}, Eigenvalue = {eigenvalues[i]:.3f}")
+        axes[i].set_title(f"Mode = {i+1}, Eigenvalue = {eigenvalues[i]}")
         #axes[i].axis('off')
 
     #plt.colorbar(label='Amplitude')
@@ -105,7 +106,9 @@ def matrix_vector(matrix, method='row'):
 
 def get_eigenmodes(M, N, modes=6):
 
-    dx = 1/N
+    dx = (1 / N)
+    M /= dx**2
+
     # Each eigenvector column is a mode
     eigenvalues, eigenvectors = scipy.linalg.eigh(M)
     sorted_eig = np.argsort(np.abs(eigenvalues))[:modes]
@@ -114,7 +117,6 @@ def get_eigenmodes(M, N, modes=6):
     # need similar nr of columns
     eigenvectors = eigenvectors[:, sorted_eig]
     eigenvalues = eigenvalues[sorted_eig]
-    eigenvalues = eigenvalues / (dx**2)
     eigenmodes = eigenvectors.reshape(N, N, -1)
     
     return eigenvalues, eigenvectors, sorted_eig, eigenmodes
@@ -212,12 +214,13 @@ def diagonal_rectangular(L):
 
 def get_eigenmodes_rectangular(M, N, modes=6):
     """Eigenmodes for rectangle"""
-    dx = 1/N
+    dx = (1 / 2*N)
+    M /= dx**2
+
     eigenvalues, eigenvectors = scipy.linalg.eigh(M)
     sorted_eig = np.argsort(np.abs(eigenvalues))[:modes]
     eigenvectors = eigenvectors[:, sorted_eig]
     eigenvalues = eigenvalues[sorted_eig]
-    eigenvalues = eigenvalues / (dx**2)
 
     # Reshape eigenmodes for rectangule (L x 2L)
     eigenmodes = eigenvectors.reshape(N, 2*N, -1)
@@ -227,12 +230,13 @@ def get_eigenmodes_rectangular(M, N, modes=6):
 
 def get_eigenmodes_circular(M, grid, N, modes=6):
     """Eigenmodes for circular grid"""
-    dx = 1/N
+    dx = (1 / N)
+    M /= dx**2
+
     eigenvalues, eigenvectors = scipy.linalg.eigh(M)
     sorted_eig = np.argsort(np.abs(eigenvalues))[:modes]
     eigenvectors = eigenvectors[:, sorted_eig]
     eigenvalues = eigenvalues[sorted_eig]
-    eigenvalues = eigenvalues / (dx**2)
 
     # Create an empty 3D array to store eigenmodes in the circular shape
     eigenmodes = np.zeros((N, N, modes))
@@ -251,12 +255,12 @@ def get_eigenmodes_circular(M, grid, N, modes=6):
 
 def get_eigenmodes_sparse_square(M, N, modes=6):
     """Eigenmodes for sparse matrix"""
-    dx = 1/N
+    dx = (1 / N)
+    M /= dx**2
+
     M_sparse = scipy.sparse.csr_matrix(M)
     eigenvalues, eigenvectors = scipy.sparse.linalg.eigs(M_sparse, 
         k=modes, which='SM')
-
-    eigenvalues = eigenvalues / (dx**2)
 
     eigenmodes = eigenvectors.reshape(N, N, -1)
 
@@ -264,12 +268,12 @@ def get_eigenmodes_sparse_square(M, N, modes=6):
 
 def get_eigenmodes_sparse_rectangular(M, N, modes=6):
     """Eigenmodes for sparse matrix"""
-    dx = 1/N
+    dx = (1 /2*N)
+    M /= dx**2
+
     M_sparse = scipy.sparse.csr_matrix(M)
     eigenvalues, eigenvectors = scipy.sparse.linalg.eigs(M_sparse, 
         k=modes, which='SM')
-
-    eigenvalues = eigenvalues / (dx**2)
 
     # Reshape eigenmodes for rectangle (L x 2L)
     eigenmodes = eigenvectors.reshape(N, 2 * N, -1)
@@ -277,12 +281,12 @@ def get_eigenmodes_sparse_rectangular(M, N, modes=6):
     return eigenvalues, eigenvectors, eigenmodes
 
 def get_eigenmodes_sparse_circular(M, grid, N, modes=6):
-    dx = 1/N
+    dx = (1 / N)
+    M /= dx**2
+
     M_sparse = scipy.sparse.csr_matrix(M)
     eigenvalues, eigenvectors = scipy.sparse.linalg.eigs(M_sparse, 
         k=modes, which='SM')
-
-    eigenvalues = eigenvalues / (dx**2)
 
     eigenmodes = np.zeros((N, N, modes))
     indexes = np.where(grid)
@@ -403,3 +407,6 @@ def time_dependent_animation_square(eigenmode, eigenval, time=1, step=0.01, A=1,
     plt.close(fig)
 
     return ani
+
+def visualise():
+    return
