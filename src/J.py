@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 k = m = 1
 
-time = 10
+time = 100
 timesteps = 1000
 dt = time/timesteps
 Lt = np.linspace(0, time, timesteps+1)
@@ -45,19 +45,6 @@ plt.plot(Lt, Lv)
 plt.plot(Lt, Lv2)
 plt.show()
 
-# for k in [0.2, 0.5, 1, 2, 5, 8]:
-#     x = 1
 
-#     v = (-k/m) * x * (dt/2)
-
-#     Lx, Lv = [x], [v]
-#     for _ in range(timesteps):
-#         x += v * dt
-#         v += (-k/m) * x * dt
-
-#         Lx.append(x)
-#         Lv.append(v)
-#     plt.plot(Lt, Lx)
-#     plt.plot(Lt, Lv)
-
-# plt.show()
+plt.plot(Lx, Lv)
+plt.show()
