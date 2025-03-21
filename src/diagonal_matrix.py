@@ -65,6 +65,7 @@ def diagonal_rectangular(L):
 
     return M
 
+
 def diagonal_rectangle(grid, diag_M, L):
     """
     """
@@ -110,8 +111,6 @@ def diagonal_circle(grid, diag_M, N):
     filtered_matrix = diag_M[rows_to_keep, :][:, cols_to_keep]
 
     return filtered_matrix
-
-
 
 
 def visualize_diag_matrix(M, N, text='ON'):
@@ -258,7 +257,6 @@ def get_eigenmodes_rectangular(M, N, modes=6):
     return eigvals, eigvecs, sorted_eig, eigenmodes
 
 
-
 def get_eigenmodes_circular(M, grid, N, modes=6):
     """Eigenmodes for circular grid"""
     dx = (1 / N)
@@ -300,9 +298,10 @@ def get_eigenmodes_sparse_square(M, N, modes=6):
 
     return eigenvalues, eigenvectors, eigenmodes
 
+
 def get_eigenmodes_sparse_rectangular(M, N, modes=6):
     """Eigenmodes for sparse matrix"""
-    dx = (1 /2*N)
+    dx = (1 / N)
 
     M_sparse = scipy.sparse.csr_matrix(M)
     eigenvalues, eigenvectors = scipy.sparse.linalg.eigs(M_sparse, 
@@ -313,6 +312,7 @@ def get_eigenmodes_sparse_rectangular(M, N, modes=6):
     eigenmodes = eigenvectors.reshape(N, 2 * N, -1)
 
     return eigenvalues, eigenvectors, eigenmodes
+
 
 def get_eigenmodes_sparse_circular(M, grid, N, modes=6):
     dx = (1 / N)
@@ -333,6 +333,7 @@ def get_eigenmodes_sparse_circular(M, grid, N, modes=6):
 
     return eigenvalues, eigenvectors, eigenmodes
 
+
 def eigenfreqs_lengths_square(L_lengths, modes=6):
     L_eigenfreqs = []
     for length in L_lengths:
@@ -352,6 +353,7 @@ def eigenfreqs_lengths_rectangular(L_lengths,modes=6):
         L_eigenfreqs.append(np.sqrt(-eigenvals))
     return L_eigenfreqs
 
+
 def eigenfreqs_lengths_circular(L_lengths,modes=6):
     L_eigenfreqs = []
     for length in L_lengths:
@@ -362,6 +364,7 @@ def eigenfreqs_lengths_circular(L_lengths,modes=6):
         eigenvals, _, _ = get_eigenmodes_sparse_circular(diag_M, grid, length, modes)
         L_eigenfreqs.append(np.sqrt(-eigenvals))
     return L_eigenfreqs
+
 
 def visualise_eigenfreqs_lengths(lengths, LL_eigenfreqs):
     """Plots the eigenfrequencies for different values of N for all three
@@ -394,6 +397,7 @@ def visualise_eigenfreqs_lengths(lengths, LL_eigenfreqs):
     plt.tight_layout()
     plt.savefig("results/2Dwave_sizedifferences.pdf")
 
+
 def time_dependent_visualise_square(eigenmode, eigenfreq, time=1, num_times=4, A=1, B=1, c=1):
     max = np.max(np.abs(eigenmode))
 
@@ -415,6 +419,7 @@ def time_dependent_visualise_square(eigenmode, eigenfreq, time=1, num_times=4, A
 
     plt.tight_layout()
     plt.savefig("results/2Dwave_snapshots.pdf")
+
 
 def time_dependent_animation_square(eigenmode, eigenfreq, time=0.01, step=0.0001, A=1, B=1, c=1):
     """"""
@@ -453,7 +458,6 @@ def visualize_all_eigenfrequencies(N, modes=5):
         axes[i].imshow(eigm_sq[:, :, i], cmap='bwr', extent=[0, 1, 0, 1], vmin = -vmax, vmax = vmax)
         axes[i].set_title(f"Mode = {i+1}, λ = {eigenfre[i]:.2f}")
 
-
     # Rectangular grid
     diag_M = diagonal_rectangular(N)
 
@@ -489,8 +493,6 @@ def visualize_all_eigenfrequencies(N, modes=5):
     fig.savefig("results/eigenfrequencies.png", dpi=300)
 
     return plt
-
-
 
 
 def matrix_grid(grid):
