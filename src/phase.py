@@ -76,10 +76,10 @@ def visualize_phase_plots(resonance_results):
     for i, (freq_ratio, (_, x, v, _)) in enumerate(resonance_results.items()):
   
         axes[i].plot(x, v)
-        axes[i].set_xlabel("Position")
-        axes[i].set_ylabel("Velocity")
-        axes[i].set_title(f"Phase Plot (ω/ω₀ = {freq_ratio})")
-    
+        axes[i].set_xlabel("Position", fontsize= 18)
+        axes[i].set_ylabel("Velocity", fontsize= 18)
+        axes[i].set_title(f"Phase Plot (ω/ω₀ = {freq_ratio})", fontsize = 20)
+        axes[i].tick_params(axis='both', which='major', labelsize=16)
     fig.tight_layout()
     fig.savefig("driven_oscillator_phase_plots.pdf")
     
@@ -95,16 +95,12 @@ def visualize_position_time_plots(resonance_results):
     for i, (freq_ratio, (t, x, v, e)) in enumerate(resonance_results.items()):
 
         axes[i].plot(t, x)
-        axes[i].set_xlabel("Time")
-        axes[i].set_ylabel("Position")
-        axes[i].set_title(f"Position vs Time (ω/ω₀ = {freq_ratio})")
+        axes[i].set_xlabel("Time", fontsize = 18)
+        axes[i].set_ylabel("Position", fontsize = 18)
+        axes[i].set_title(f"Position vs Time (ω/ω₀ = {freq_ratio})", fontsize = 20)
+        axes[i].tick_params(axis='both', which='major', labelsize=16)
     
     fig.tight_layout()
     fig.savefig("driven_oscillator_position_plots.pdf")
     
     return fig
-
-resonance_results, natural_freq = analyze_resonance(k=1.0, driving_amplitude=0.2, time=100.0, timesteps=10000)
-fig = visualize_phase_plots(resonance_results)
-fig = visualize_position_time_plots(resonance_results)
-plt.show()
