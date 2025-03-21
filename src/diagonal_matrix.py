@@ -73,7 +73,7 @@ def visualize_multiple_modes(eigenmodes, eigenvalues, N, num_modes=6):
         max = np.max(np.abs(eigenmodes[:,:,i]))
         axes[i].set_axis_on()
         axes[i].imshow(eigenmodes[:, :, i], cmap='bwr', extent=[0, 1, 0, 1], vmin = -max, vmax = max)
-        axes[i].set_title(f"Mode = {i+1}, Eigenvalue = {eigenvalues[i]}")
+        axes[i].set_title(f"Mode = {i+1}, Eigenvalue = {round(eigenvalues[i],2)}")
         #axes[i].axis('off')
 
     #plt.colorbar(label='Amplitude')
@@ -304,18 +304,18 @@ def eigenfreqs_lengths_square(L_lengths, modes=6):
     for length in L_lengths:
         diag_M = diagonal_matrix(length)
 
-        eigenfreqs, _, _ = get_eigenmodes_sparse_square(diag_M, length, modes)
-        L_eigenfreqs.append(eigenfreqs)
+        eigenvals, _, _ = get_eigenmodes_sparse_square(diag_M, length, modes)
+        L_eigenfreqs.append(np.sqrt(-eigenvals))
     return L_eigenfreqs
         
 
-def eigenfreqs_lengths_rectangle(L_lengths,modes=6):
+def eigenfreqs_lengths_rectangular(L_lengths,modes=6):
     L_eigenfreqs = []
     for length in L_lengths:
         diag_M = diagonal_matrix(length)
 
-        eigenfreqs, _, _ = get_eigenmodes_sparse_rectangular(diag_M, length, modes)
-        L_eigenfreqs.append(eigenfreqs)
+        eigenvals, _, _ = get_eigenmodes_sparse_rectangular(diag_M, length, modes)
+        L_eigenfreqs.append(np.sqrt(-eigenvals))
     return L_eigenfreqs
 
 def eigenfreqs_lengths_circular(L_lengths,modes=6):
@@ -325,8 +325,8 @@ def eigenfreqs_lengths_circular(L_lengths,modes=6):
         grid = circular_domain(length)
         diag_M = diagonal_circle(grid, diag_M, length) 
 
-        eigenfreqs, _, _ = get_eigenmodes_sparse_circular(diag_M, grid, length, modes)
-        L_eigenfreqs.append(eigenfreqs)
+        eigenvals, _, _ = get_eigenmodes_sparse_circular(diag_M, grid, length, modes)
+        L_eigenfreqs.append(np.sqrt(-eigenvals))
     return L_eigenfreqs
 
 def visualise_eigenfreqs_lengths(lengths, LL_eigenfreqs):
@@ -344,8 +344,8 @@ def visualise_eigenfreqs_lengths(lengths, LL_eigenfreqs):
     # Flatten the axes for correct image rendering
     axes = axes.flatten()
 
-    for ax in axes:
-        ax.set_axis_off()
+    # for ax in axes:
+    #     ax.set_axis_off()
     
     L_lengths = [[x]*6 for x in lengths]
     domain_shapes = ["Square", "Rectangular", "Circular"]
@@ -354,17 +354,16 @@ def visualise_eigenfreqs_lengths(lengths, LL_eigenfreqs):
         for j in range(len(L_lengths)):
             axes[i].scatter(L_lengths[j], LL_eigenfreqs[i][j], alpha=0.5)
         axes[i].set_xlim(0,max(lengths)+10)
-        axes[i].set_ylim(-150,0)
+        # axes[i].set_ylim(-150,0)
         axes[i].set_xlabel("length")
         axes[i].set_ylabel("eigenfrequencies")
         axes[i].set_title(f"Shape = {domain_shapes[i]}")
-        #axes[i].axis('off')
 
     #plt.colorbar(label='Amplitude')
     plt.tight_layout()
     plt.savefig("results/2Dwave_sizedifferences.pdf")
 
-def time_dependent_visualise_square(eigenmode, eigenval, time=1, num_times=4, A=1, B=1, c=1):
+def time_dependent_visualise_square(eigenmode, eigenfreq, time=1, num_times=4, A=1, B=1, c=1):
     max = np.max(np.abs(eigenmode))
 
     horizontal = ((num_times // 3) +(num_times % 3))
@@ -378,7 +377,7 @@ def time_dependent_visualise_square(eigenmode, eigenval, time=1, num_times=4, A=
 
     for i in range(num_times):
         t = i*(time/(num_times-1))
-        u = eigenmode * (A*np.cos(c*eigenval*t)+B*np.sin(c*eigenval*t))
+        u = eigenmode * (A*np.cos(c*eigenfreq*t)+B*np.sin(c*eigenfreq*t))
         axes[i].imshow(u, cmap="bwr", extent=[0, 1, 0, 1], vmin=-max, vmax=max)
         axes[i].set_axis_on()
         axes[i].set_title(f"t={round(t, 4)}")
@@ -386,7 +385,7 @@ def time_dependent_visualise_square(eigenmode, eigenval, time=1, num_times=4, A=
     plt.tight_layout()
     plt.savefig("results/2Dwave_snapshots.pdf")
 
-def time_dependent_animation_square(eigenmode, eigenval, time=1, step=0.01, A=1, B=1, c=1):
+def time_dependent_animation_square(eigenmode, eigenfreq, time=1, step=0.01, A=1, B=1, c=1):
     """"""
     max = np.max(np.abs(eigenmode))
 
@@ -396,7 +395,7 @@ def time_dependent_animation_square(eigenmode, eigenval, time=1, step=0.01, A=1,
     # Store precomputed frames
     ims = []
     for t in np.arange(0+step, time, step):
-        u = eigenmode * (A*np.cos(c*eigenval*t)+B*np.sin(c*eigenval*t))
+        u = eigenmode * (A*np.cos(c*eigenfreq*t)+B*np.sin(c*eigenfreq*t))
         im_ = ax.imshow(u, cmap="bwr", extent=[0, 1, 0, 1], animated=True, vmin=-max, vmax=max)
         ims.append([im_])
 
