@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 from scipy.sparse import lil_matrix, csr_matrix
 from scipy.sparse.linalg import spsolve
 import matplotlib.cm as cm
-
-def create_grid(N, radius):
+import typing 
+def create_grid(N: int, radius: float):
     """Create a square grid that contains the circular disk """
     x = np.linspace(-radius-0.1, radius+0.1, N)
     y = np.linspace(-radius-0.1, radius+0.1, N)
