@@ -12,7 +12,6 @@ def diagonal_matrix(N):
     (length x length) size of a grid."""
 
     size = N * N
-    dx = (1 / N)
 
     # Initialize matrix with zeros
     M = np.zeros((size, size))
@@ -36,7 +35,83 @@ def diagonal_matrix(N):
          M[n, n-1] = 0
          M[n-1, n] = 0 
 
-    return M / (dx**2)
+    return M 
+
+
+def diagonal_rectangular(L):
+    N = (2*L)
+    size = L * N
+
+    M = np.zeros((size, size))
+
+    for i in range(size):
+        M[i, i] = -4  # Center point
+
+        if (i + 1) % N != 0:  # Right 
+            M[i, i + 1] = 1
+        
+        if i % N != 0:  # Left 
+            M[i, i - 1] = 1
+
+        if i + N < size:  # Bottom 
+            M[i, i + N] = 1
+
+        if i - N >= 0:  # Top 
+            M[i, i - N] = 1
+
+    for n in range(N, size, N):
+        M[n, n-1] = 0
+        M[n-1, n] = 0 
+
+    return M
+
+def diagonal_rectangle(grid, diag_M, L):
+    """
+    """
+    rows, cols = grid.shape  # should be (L, 2L)
+    assert rows == L and cols == 2*L, "grid must be shape (L, 2L)"
+    
+    for i in range(rows):
+        for j in range(cols):
+            if not grid[i, j]:
+                idx = i*cols + j
+                # Mark row & column idx with the sentinel
+                diag_M[idx, :] = 3
+                diag_M[:, idx] = 3
+
+    rows_to_keep = ~np.all(diag_M == 3, axis=1)
+    cols_to_keep = ~np.all(diag_M == 3, axis=0)
+
+    filtered_matrix = diag_M[rows_to_keep, :][:, cols_to_keep]
+    
+    return filtered_matrix
+
+
+def rectangular_domain(L):
+    # shape (L, 2L)
+    grid = np.ones((L, 2*L), dtype=bool)
+    return grid
+
+
+def diagonal_circle(grid, diag_M, N):
+    """Filters the diagonal for a matrix that is not a square"""
+    for i in range(N):
+        for j in range(N):
+            if grid[i][j] == False:
+                index = i * N + j
+
+                diag_M[index, :] = 3
+                diag_M[:, index] = 3
+
+    # Flip True/False to remove correct cols and rows
+    rows_to_keep = ~np.all(diag_M == 3, axis=1)
+    cols_to_keep = ~np.all(diag_M == 3, axis=0)
+
+    filtered_matrix = diag_M[rows_to_keep, :][:, cols_to_keep]
+
+    return filtered_matrix
+
+
 
 
 def visualize_diag_matrix(M, N, text='ON'):
@@ -81,9 +156,29 @@ def visualize_multiple_modes(eigenmodes, eigenvalues, N, num_modes=6):
     plt.show()
 
 
-def matrix_grid(grid):
-    """If we need to create a grid for the problem"""
-    return np.pad(grid, 1)
+def visualize_rectangular_modes(eigenmodes, eigvals, N, modes=6):
+    """
+    """
+    # A small grid for subplots
+    horizontal = ((modes // 3) +(modes % 3))
+    fig, axes = plt.subplots(horizontal, 3, figsize=(10, 6), squeeze=False)
+    axes = axes.flatten()
+
+    for ax in axes:
+        ax.set_axis_off()
+
+    for i in range(modes):
+        vmax = np.max(np.abs(eigenmodes[:,:,i]))
+
+        # Show an image that is physically 2 wide, 1 high
+        im = axes[i].imshow(eigenmodes[:,:,i], cmap='bwr', extent=[0, 2, 0, 1],
+            vmin=-vmax, vmax=vmax, aspect='equal')
+
+        axes[i].set_title(f"Mode {i+1} λ = {eigvals[i]:.2f}")
+
+    plt.tight_layout()
+    fig.savefig("results/eigenfrequencyrect.png", dpi=300)
+    plt.show()
 
 
 def matrix_vector(matrix, method='row'):
@@ -104,38 +199,6 @@ def matrix_vector(matrix, method='row'):
     return vector
 
 
-def get_eigenmodes(M, N, modes=6):
-
-    dx = (1 / N)
-    M /= dx**2
-
-    # Each eigenvector column is a mode
-    eigenvalues, eigenvectors = scipy.linalg.eigh(M)
-    sorted_eig = np.argsort(np.abs(eigenvalues))[:modes]
-
-    # Only take smallest number and each eigenvector column is a mode so 
-    # need similar nr of columns
-    eigenvectors = eigenvectors[:, sorted_eig]
-    eigenvalues = eigenvalues[sorted_eig]
-    eigenmodes = eigenvectors.reshape(N, N, -1)
-    
-    return eigenvalues, eigenvectors, sorted_eig, eigenmodes
-
-
-def rectangular_domain(L):
-    """The rectangle's 2L side is assumed to be horizontal"""
-    if L % 2 != 0:
-        raise ValueError("L must be an integer divided by two, improper "
-            "borders.")
-    
-    grid = np.zeros((L, 2*L))
-    grid[:, :] = False
-    L_half = int(L / 2)
-    grid[L_half:-L_half, :] = True
-
-    return grid
-
-
 def circular_domain(N):
     """Circular domain according to the leuclidian domain.
     If L is even, the center (L//2, L//2) falls on the corner of four pixels.
@@ -150,93 +213,63 @@ def circular_domain(N):
 
     y,x = np.ogrid[:N, :N]
 
-    mask = (x-center[0])**2 + (y-center[1])**2 <= radius**2
+    mask = (x - center[0])**2 + (y - center[1])**2 <= radius**2
 
     grid[mask] = True
     return grid
-
-
-def test_domain(grid):
-    fig, ax = plt.subplots(figsize=(6, 6))
-    
-    ax.matshow(grid, cmap='viridis')
-
-    plt.show()
-    return
     
 
-def diagonal_circle(grid, diag_M, N):
-    """Filters the diagonal for a matrix that is not a square"""
-    for i in range(N):
-        for j in range(N):
-            if grid[i][j] == False:
-                index = i * N + j
+def get_eigenmodes(M, N, modes=6):
 
-                diag_M[index, :] = 3
-                diag_M[:, index] = 3
+    dx = (1 / N)
 
-    # Flip True/False to remove correct cols and rows
-    rows_to_keep = ~np.all(diag_M == 3, axis=1)
-    cols_to_keep = ~np.all(diag_M == 3, axis=0)
+    # Each eigenvector column is a mode
+    eigenvalues, eigenvectors = scipy.linalg.eigh(M)
+    sorted_eig = np.argsort(np.abs(eigenvalues))[:modes]
 
-    filtered_matrix = diag_M[rows_to_keep, :][:, cols_to_keep]
-
-    return filtered_matrix
-
-
-def diagonal_rectangular(L):
-    N = (2*L)
-    size = L * N
-
-    M = np.zeros((size, size))
-
-    for i in range(size):
-        M[i, i] = -4  # Center point
-
-        if (i + 1) % N != 0:  # Right 
-            M[i, i + 1] = 1
-        
-        if i % N != 0:  # Left 
-            M[i, i - 1] = 1
-
-        if i + N < size:  # Bottom 
-            M[i, i + N] = 1
-
-        if i - N >= 0:  # Top 
-            M[i, i - N] = 1
-
-    for n in range(N, size, N):
-        M[n, n-1] = 0
-        M[n-1, n] = 0 
-
-    return M
+    # Only take smallest number and each eigenvector column is a mode so 
+    # need similar nr of columns
+    eigenvectors = eigenvectors[:, sorted_eig]
+    eigenvalues /= dx**2
+    eigenvalues = eigenvalues[sorted_eig]
+    eigenmodes = eigenvectors.reshape(N, N, -1)
+    
+    return eigenvalues, eigenvectors, sorted_eig, eigenmodes
 
 
 def get_eigenmodes_rectangular(M, N, modes=6):
-    """Eigenmodes for rectangle"""
-    dx = (1 / 2*N)
-    M /= dx**2
+    """
+    """
+    dx = 1.0 / N
 
-    eigenvalues, eigenvectors = scipy.linalg.eigh(M)
-    sorted_eig = np.argsort(np.abs(eigenvalues))[:modes]
-    eigenvectors = eigenvectors[:, sorted_eig]
-    eigenvalues = eigenvalues[sorted_eig]
+    # Solve (real symmetric) for all eigenvalues
+    eigvals, eigvecs = scipy.linalg.eigh(M)
 
-    # Reshape eigenmodes for rectangule (L x 2L)
-    eigenmodes = eigenvectors.reshape(N, 2*N, -1)
-    
-    return eigenvalues, eigenvectors, sorted_eig, eigenmodes
+    # Sort by smallest magnitude (or smallest negative, depending on sign)
+    sorted_eig = np.argsort(np.abs(eigvals))[:modes]
+    eigvals = eigvals[sorted_eig]
+    eigvecs = eigvecs[:, sorted_eig]
+
+    # Scale eigenvalues by 1/dx^2 if needed
+    eigvals /= dx**2
+
+    eigenmodes = eigvecs.reshape(N, 2*N, -1)
+
+    return eigvals, eigvecs, sorted_eig, eigenmodes
+
 
 
 def get_eigenmodes_circular(M, grid, N, modes=6):
     """Eigenmodes for circular grid"""
     dx = (1 / N)
-    M /= dx**2
 
     eigenvalues, eigenvectors = scipy.linalg.eigh(M)
     sorted_eig = np.argsort(np.abs(eigenvalues))[:modes]
     eigenvectors = eigenvectors[:, sorted_eig]
+    eigenvalues /= dx**2
+
     eigenvalues = eigenvalues[sorted_eig]
+
 
     # Create an empty 3D array to store eigenmodes in the circular shape
     eigenmodes = np.zeros((N, N, modes))
@@ -253,14 +286,15 @@ def get_eigenmodes_circular(M, grid, N, modes=6):
     
     return eigenvalues, eigenvectors, sorted_eig, eigenmodes
 
+
 def get_eigenmodes_sparse_square(M, N, modes=6):
     """Eigenmodes for sparse matrix"""
     dx = (1 / N)
-    M /= dx**2
 
     M_sparse = scipy.sparse.csr_matrix(M)
     eigenvalues, eigenvectors = scipy.sparse.linalg.eigs(M_sparse, 
         k=modes, which='SM')
+    eigenvalues /= dx**2
 
     eigenmodes = eigenvectors.reshape(N, N, -1)
 
@@ -269,11 +303,11 @@ def get_eigenmodes_sparse_square(M, N, modes=6):
 def get_eigenmodes_sparse_rectangular(M, N, modes=6):
     """Eigenmodes for sparse matrix"""
     dx = (1 /2*N)
-    M /= dx**2
 
     M_sparse = scipy.sparse.csr_matrix(M)
     eigenvalues, eigenvectors = scipy.sparse.linalg.eigs(M_sparse, 
         k=modes, which='SM')
+    eigenvalues /= dx**2
 
     # Reshape eigenmodes for rectangle (L x 2L)
     eigenmodes = eigenvectors.reshape(N, 2 * N, -1)
@@ -282,11 +316,11 @@ def get_eigenmodes_sparse_rectangular(M, N, modes=6):
 
 def get_eigenmodes_sparse_circular(M, grid, N, modes=6):
     dx = (1 / N)
-    M /= dx**2
 
     M_sparse = scipy.sparse.csr_matrix(M)
     eigenvalues, eigenvectors = scipy.sparse.linalg.eigs(M_sparse, 
         k=modes, which='SM')
+    eigenvalues /= dx**2
 
     eigenmodes = np.zeros((N, N, modes))
     indexes = np.where(grid)
@@ -404,5 +438,70 @@ def time_dependent_animation_square(eigenmode, eigenfreq, time=0.01, step=0.0001
 
     return ani
 
-def visualise():
+
+def visualize_all_eigenfrequencies(N, modes=5):
+    fig, axes = plt.subplots(3, 5, figsize=(12,8))
+    axes = axes.flatten()
+
+    # Square grid
+    diag_M = diagonal_matrix(N)
+    eigv_sq, _, _, eigm_sq = get_eigenmodes(diag_M, N, modes=6)
+    eigenfre = (-eigv_sq) ** 0.5
+
+    for i in range(modes):
+        vmax = np.max(np.abs(eigm_sq[:,:,i]))
+        axes[i].imshow(eigm_sq[:, :, i], cmap='bwr', extent=[0, 1, 0, 1], vmin = -vmax, vmax = vmax)
+        axes[i].set_title(f"Mode = {i+1}, λ = {eigenfre[i]:.2f}")
+
+
+    # Rectangular grid
+    diag_M = diagonal_rectangular(N)
+
+    eigv_rec, _, _, eigm_rec = get_eigenmodes_rectangular(diag_M, N, modes)
+    eigenfre = (-eigv_rec) ** 0.5
+
+    for i in range(modes):
+        vmax = np.max(np.abs(eigm_rec[:,:,i]))
+        im = axes[i+modes].imshow(eigm_rec[:,:,i], cmap='bwr', extent=[0, 2, 0, 1],
+            vmin=-vmax, vmax=vmax, aspect='equal')
+        axes[i+modes].set_title(f"Mode {i+1} λ = {eigenfre[i]:.2f}")
+
+    # Circular grid
+
+    diag_M = diagonal_matrix(N)
+    grid = circular_domain(N)
+    diag_M = diagonal_circle(grid, diag_M, N) 
+
+    eigv_cir, _, _, eigm_cir = get_eigenmodes_circular(diag_M, grid, N, modes)
+    eigenfre = (-eigv_cir) ** 0.5
+
+    for i in range(modes):
+        vmax = np.max(np.abs(eigm_cir[:,:,i]))
+        axes[i+(2*modes)].imshow(eigm_cir[:, :, i], cmap='bwr', extent=[0, 1, 0, 1], vmin = -vmax, vmax = vmax)
+        axes[i+(2*modes)].set_title(f"Mode = {i+1}, λ = {eigenfre[i]:.2f}")
+
+    for ax in axes:
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+    #plt.tight_layout()
+    plt.show()
+    fig.savefig("results/eigenfrequencies.png", dpi=300)
+
+    return plt
+
+
+
+
+def matrix_grid(grid):
+    """If we need to create a grid for the problem"""
+    return np.pad(grid, 1)
+
+
+def test_domain(grid):
+    fig, ax = plt.subplots(figsize=(6, 6))
+    
+    ax.matshow(grid, cmap='viridis')
+
+    plt.show()
     return
