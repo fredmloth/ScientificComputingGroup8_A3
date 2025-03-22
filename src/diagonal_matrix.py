@@ -424,23 +424,46 @@ def time_dependent_visualise_square(eigenmode, eigenfreq, time=1, num_times=4, A
     plt.savefig("results/2Dwave_snapshots.pdf")
 
 
-def time_dependent_animation_square(eigenmode, eigenfreq, time=0.01, step=0.0001, A=1, B=1, c=1):
+def time_dependent_animation(eigenmode, eigenfreq, mode, time=0.01, step=0.0001, A=1, B=1, c=1):
     """"""
-    max = np.max(np.abs(eigenmode))
+    vmax = np.max(np.abs(eigenmode * (np.cos(np.pi/4) + np.sin(np.pi/4))))
 
     fig, ax = plt.subplots()
-    im = ax.imshow(eigenmode, cmap="bwr", extent=[0, 1, 0, 1], vmin=-max, vmax=max)
+    im = ax.imshow(eigenmode, cmap="bwr", extent=[0, 1, 0, 1], vmin=-vmax, vmax=vmax)
 
     # Store precomputed frames
     ims = []
     for t in np.arange(0+step, time, step):
         u = eigenmode * (A*np.cos(c*eigenfreq*t)+B*np.sin(c*eigenfreq*t))
-        im_ = ax.imshow(u, cmap="bwr", extent=[0, 1, 0, 1], animated=True, vmin=-max, vmax=max)
+        im_ = ax.imshow(u, cmap="bwr", extent=[0, 1, 0, 1], animated=True, vmin=-vmax, vmax=vmax)
         ims.append([im_])
 
+    ax.set_title(f"2D Wave Equation (mode = {mode})")
     # Use ArtistAnimation
     ani = animation.ArtistAnimation(fig, ims, interval=100, blit=True)
+    # Close the figure to not display in the notebook
+    plt.close(fig)
 
+    return ani
+
+
+def time_dependent_animation_rectangular(eigenmode, eigenfreq, mode, time=0.01, step=0.0001, A=1, B=1, c=1):
+    """"""
+    vmax = np.max(np.abs(eigenmode * (np.cos(np.pi/4) + np.sin(np.pi/4))))
+
+    fig, ax = plt.subplots()
+    im = ax.imshow(eigenmode, cmap="bwr", extent=[0, 2, 0, 1], vmin=-vmax, vmax=vmax, aspect='equal')
+
+    # Store precomputed frames
+    ims = []
+    for t in np.arange(0+step, time, step):
+        u = eigenmode * (A*np.cos(c*eigenfreq*t)+B*np.sin(c*eigenfreq*t))
+        im_ = ax.imshow(u, cmap="bwr", extent=[0, 2, 0, 1], animated=True, vmin=-vmax, vmax=vmax, aspect='equal')
+        ims.append([im_])
+
+    ax.set_title(f"2D Wave Equation (mode = {mode})")
+    # Use ArtistAnimation
+    ani = animation.ArtistAnimation(fig, ims, interval=100, blit=True)
     # Close the figure to not display in the notebook
     plt.close(fig)
 
