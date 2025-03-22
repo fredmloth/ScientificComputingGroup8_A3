@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 
+
 def leapfrog_oscillator(k=1.0, m=1.0, time=10.0, timesteps=1000, driving_amplitude=0.0, driving_frequency=0.0, x0=1.0, v0=0.0):
 
     dt = time/timesteps
@@ -46,7 +47,6 @@ def leapfrog_oscillator(k=1.0, m=1.0, time=10.0, timesteps=1000, driving_amplitu
     return t_values, x_values, v_values, energy
 
 
-
 def analyze_resonance(k=1.0, m=1.0, driving_amplitude=0.2, time=10.0, timesteps=1000):
     """
     Function to analyze the system behavior at different driving frequencies around resonance
@@ -84,6 +84,8 @@ def visualize_phase_plots(resonance_results):
     fig.savefig("driven_oscillator_phase_plots.pdf")
     
     return fig
+
+
 def visualize_position_time_plots(resonance_results):
 
     n_freqs = len(resonance_results)

@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def harmonic_oscillator(k=1, m=1, time=1, timesteps=1000):
     dt = time/timesteps
     x = 1
@@ -16,6 +17,7 @@ def harmonic_oscillator(k=1, m=1, time=1, timesteps=1000):
         Lv.append(v)
 
     return Lx, Lv
+
 
 def visualise_harmonic_oscillator(Lt, dict_x, dict_v):
     fig, axes = plt.subplots(1, 2, figsize=(8, 4))

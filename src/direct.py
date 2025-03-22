@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 from scipy.sparse import lil_matrix, csr_matrix
 from scipy.sparse.linalg import spsolve
 import matplotlib.cm as cm
-import typing 
+import typing
+
+
 def create_grid(N: int, radius: float):
     """Create a square grid that contains the circular disk """
     x = np.linspace(-radius-0.1, radius+0.1, N)
@@ -12,9 +14,11 @@ def create_grid(N: int, radius: float):
     h = x[1] - x[0] 
     return X, Y, h
 
+
 def create_disk_mask(X, Y, radius):
     """Create a boolean mask for points inside the disk """
     return X**2 + Y**2 <= radius**2
+
 
 def create_index_mapping(mask):
     """Create a mapping from 2D grid indices to 1D system indices """
@@ -28,11 +32,13 @@ def create_index_mapping(mask):
                 counter += 1
     return map_2d_to_1d, counter
 
+
 def find_source_location(x, y, source_x, source_y):
     """Find the grid indices closest to the source coordinates """
     source_i = np.argmin(np.abs(y - source_y))
     source_j = np.argmin(np.abs(x - source_x))
     return source_i, source_j
+
 
 def adjust_source_location(source_i, source_j, mask, X, Y, source_x, source_y):
     """Adjust source location if it falls outside the domain of simulation """
@@ -48,6 +54,7 @@ def adjust_source_location(source_i, source_j, mask, X, Y, source_x, source_y):
                         source_i, source_j = i, j
         print(f"Source moved to nearest interior point: ({X[source_i, source_j]:.2f}, {Y[source_i, source_j]:.2f})")
     return source_i, source_j
+
 
 def build_matrix_system(mask, map_2d_to_1d, n_interior, source_i, source_j):
     """Build the coefficient matrix M and right-hand side vector b """
@@ -76,10 +83,12 @@ def build_matrix_system(mask, map_2d_to_1d, n_interior, source_i, source_j):
     
     return csr_matrix(M), b
 
+
 def solve_system(M, b):
     """Solve the linear system M . c = b  """
     
     return spsolve(M, b)
+
 
 def map_solution_to_grid(c, mask, map_2d_to_1d):
     """
@@ -92,6 +101,7 @@ def map_solution_to_grid(c, mask, map_2d_to_1d):
             if mask[i, j]:
                 C[i, j] = c[map_2d_to_1d[i, j]]
     return C
+
 
 def solve_diffusion_direct(N, radius=2.0, source_x=0.6, source_y=1.2):
     """
@@ -118,6 +128,7 @@ def solve_diffusion_direct(N, radius=2.0, source_x=0.6, source_y=1.2):
     
     return X, Y, C
 
+
 def plot_disk_boundary(radius):
 
     """Plotting the boundary of the disk """
@@ -137,6 +148,7 @@ def setup_plot_attributes(radius):
     plt.ylabel('y', fontsize=16)
     plt.grid(False)
 
+
 def plot_solution(X, Y, C, radius=2.0, source_x=0.6, source_y=1.2):
     """Plot the concentration field of the domain """
 
@@ -150,6 +162,3 @@ def plot_solution(X, Y, C, radius=2.0, source_x=0.6, source_y=1.2):
     
     plt.tight_layout()
     plt.show()
-
-
-
