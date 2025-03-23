@@ -66,6 +66,7 @@ def diagonal_rectangular(L):
 
     return M
 
+
 def diagonal_rectangle(grid, diag_M, L):
     """
     """
@@ -125,7 +126,7 @@ def visualize_diag_matrix(M, N, text='ON'):
     return fig
 
 
-def visualize_multiple_modes(eigenmodes, eigenvalues, N, num_modes=6):
+def visualize_multiple_modes(eigenmodes, eigenvalues, L, num_modes=6):
     """Plots eigenmodes"""
 
     horizontal = ((num_modes // 3) +(num_modes % 3))
@@ -140,14 +141,15 @@ def visualize_multiple_modes(eigenmodes, eigenvalues, N, num_modes=6):
     for i in range(num_modes):
         max = np.max(np.abs(eigenmodes[:,:,i]))
         axes[i].set_axis_on()
-        axes[i].imshow(eigenmodes[:, :, i], cmap='bwr', extent=[0, 1, 0, 1], vmin = -max, vmax = max)
-        axes[i].set_title(f"Mode = {i+1}, Eigenvalue = {eigenvalues[i]}")
+        axes[i].imshow(eigenmodes[:, :, i], cmap='bwr', extent=[0, L, 0, L], vmin = -max, vmax = max)
+        axes[i].set_title(f"Mode = {i+1}, Eigenvalue = {round(eigenvalues[i],2)}")
+        #axes[i].axis('off')
 
     plt.tight_layout()
     plt.show()
 
 
-def visualize_rectangular_modes(eigenmodes, eigvals, N, modes=6):
+def visualize_rectangular_modes(eigenmodes, eigvals, L, modes=6):
     """
     """
     # A small grid for subplots
@@ -162,9 +164,9 @@ def visualize_rectangular_modes(eigenmodes, eigvals, N, modes=6):
         vmax = np.max(np.abs(eigenmodes[:,:,i]))
 
         # Show an image that is physically 2 wide, 1 high
-        im = axes[i].imshow(eigenmodes[:,:,i], cmap='bwr', extent=[0, 2, 0, 1],
+        im = axes[i].imshow(eigenmodes[:,:,i], cmap='bwr', extent=[0, 2*L, 0, L],
             vmin=-vmax, vmax=vmax, aspect='equal')
-
+        axes[i].set_axis_on()
         axes[i].set_title(f"Mode {i+1} λ = {eigvals[i]:.2f}")
 
     plt.tight_layout()
@@ -210,9 +212,9 @@ def circular_domain(N):
     return grid
     
 
-def get_eigenmodes(M, N, modes=6):
+def get_eigenmodes(M, L, dx, modes=6):
 
-    dx = (1 / N)
+    steps = int(L / dx)
 
     # Each eigenvector column is a mode
     eigenvalues, eigenvectors = scipy.linalg.eigh(M)
@@ -223,15 +225,15 @@ def get_eigenmodes(M, N, modes=6):
     eigenvectors = eigenvectors[:, sorted_eig]
     eigenvalues /= dx**2
     eigenvalues = eigenvalues[sorted_eig]
-    eigenmodes = eigenvectors.reshape(N, N, -1)
+    eigenmodes = eigenvectors.reshape(steps, steps, -1)
     
     return eigenvalues, eigenvectors, sorted_eig, eigenmodes
 
 
-def get_eigenmodes_rectangular(M, N, modes=6):
+def get_eigenmodes_rectangular(M, L, dx, modes=6):
     """
     """
-    dx = 1.0 / N
+    steps = int(L/dx)
 
     # Solve (real symmetric) for all eigenvalues
     eigvals, eigvecs = scipy.linalg.eigh(M)
@@ -244,15 +246,14 @@ def get_eigenmodes_rectangular(M, N, modes=6):
     # Scale eigenvalues by 1/dx^2 if needed
     eigvals /= dx**2
 
-    eigenmodes = eigvecs.reshape(N, 2*N, -1)
+    eigenmodes = eigvecs.reshape(steps, 2*steps, -1)
 
     return eigvals, eigvecs, sorted_eig, eigenmodes
 
 
-
-def get_eigenmodes_circular(M, grid, N, modes=6):
+def get_eigenmodes_circular(M, grid, L, dx, modes=6):
     """Eigenmodes for circular grid"""
-    dx = (1 / N)
+    steps = int(L/dx)
 
     eigenvalues, eigenvectors = scipy.linalg.eigh(M)
     sorted_eig = np.argsort(np.abs(eigenvalues))[:modes]
@@ -263,14 +264,14 @@ def get_eigenmodes_circular(M, grid, N, modes=6):
 
 
     # Create an empty 3D array to store eigenmodes in the circular shape
-    eigenmodes = np.zeros((N, N, modes))
+    eigenmodes = np.zeros((steps, steps, modes))
 
     # Get indexes of True grid
     indexes = np.where(grid)
 
     for i in range(modes):
         mode_vector = eigenvectors[:, i]
-        mode_grid = np.zeros((N, N))
+        mode_grid = np.zeros((steps, steps))
         mode_grid[indexes] = mode_vector
 
         eigenmodes[:, :, i] = mode_grid
@@ -278,134 +279,125 @@ def get_eigenmodes_circular(M, grid, N, modes=6):
     return eigenvalues, eigenvectors, sorted_eig, eigenmodes
 
 
-def get_eigenmodes_sparse_square(M, N, modes=6):
+def get_eigenmodes_sparse_square(M, L, dx, modes=6):
     """Eigenmodes for sparse matrix"""
-    dx = (1 / N)
+    steps = int(L/dx)
 
     M_sparse = scipy.sparse.csr_matrix(M)
     eigenvalues, eigenvectors = scipy.sparse.linalg.eigs(M_sparse, 
         k=modes, which='SM')
     eigenvalues /= dx**2
 
-    eigenmodes = eigenvectors.reshape(N, N, -1)
+    eigenmodes = eigenvectors.reshape(steps, steps, -1)
 
     return eigenvalues, eigenvectors, eigenmodes
 
 
-def get_eigenmodes_sparse_rectangular(M, N, modes=6):
-    """
-    """
-    dx = 1.0 / N 
-    
-    M_sparse = scipy.sparse.csr_matrix(M)
-    
-    # Compute the k smallest eigenvalues in magnitude
-    vals, vecs = scipy.sparse.linalg.eigs(M_sparse, k=modes, which='SM')
-    
-    # Convert to real (small floating imaginary parts can exist)
-    vals = np.real(vals)
-    vecs = np.real(vecs)
-    
-    # Sort by ascending magnitude
-    idx_sort = np.argsort(np.abs(vals))
-    vals = vals[idx_sort]
-    vecs = vecs[:, idx_sort]
-    vals = vals[:modes]
-    vecs = vecs[:, :modes]
-    
-    vals /= dx**2
-    eigenmodes = vecs.reshape(N, 2*N, modes)
-
-    return vals, vecs, eigenmodes
-
-
-def get_eigenmodes_sparse_circular(M, grid, N, modes=6):
-    dx = (1 / N)
+def get_eigenmodes_sparse_rectangular(M, L, dx, modes=6):
+    """Eigenmodes for sparse matrix"""
+    steps = int(L/dx)
 
     M_sparse = scipy.sparse.csr_matrix(M)
     eigenvalues, eigenvectors = scipy.sparse.linalg.eigs(M_sparse, 
         k=modes, which='SM')
     eigenvalues /= dx**2
 
-    eigenmodes = np.zeros((N, N, modes))
+    # Reshape eigenmodes for rectangle (L x 2L)
+    eigenmodes = eigenvectors.reshape(steps, 2*steps, -1)
+
+    return vals, vecs, eigenmodes
+
+
+
+def get_eigenmodes_sparse_circular(M, grid, L, dx, modes=6):
+    steps = int(L/dx)
+
+    M_sparse = scipy.sparse.csr_matrix(M)
+    eigenvalues, eigenvectors = scipy.sparse.linalg.eigs(M_sparse, 
+        k=modes, which='SM')
+    eigenvalues /= dx**2
+
+    eigenmodes = np.zeros((steps, steps, modes))
     indexes = np.where(grid)
 
     for i in range(modes):
         mode_vector = eigenvectors[:, i]
-        mode_grid = np.zeros((N, N))
+        mode_grid = np.zeros((steps, steps))
         mode_grid[indexes] = np.real(mode_vector)
         eigenmodes[:, :, i] = mode_grid
 
     return eigenvalues, eigenvectors, eigenmodes
 
-def eigenfreqs_lengths_square(L_lengths, modes=6):
-    L_eigenfreqs = []
-    for length in L_lengths:
-        diag_M = diagonal_matrix(length)
 
-        eigenfreqs, _, _ = get_eigenmodes_sparse_square(diag_M, length, modes)
-        L_eigenfreqs.append(eigenfreqs)
-    return L_eigenfreqs
+def eigenfreqs_size_square(list_L, dx, modes=6):
+    list_eigfreq = []
+    for L in list_L:
+        steps = int(L/dx)
+        
+        diag_M = diagonal_matrix(steps)
+        eigenvals, _, _ = get_eigenmodes_sparse_square(diag_M, L, dx, modes)
+        list_eigfreq.append(np.sqrt(-eigenvals))
+    return list_eigfreq
         
 
-def eigenfreqs_lengths_rectangle(L_lengths,modes=6):
-    L_eigenfreqs = []
-    for length in L_lengths:
-        diag_M = diagonal_matrix(length)
+def eigenfreqs_size_rectangular(list_L, dx, modes=6):
+    list_eigfreq = []
+    for L in list_L:
+        steps = int(L/dx)
+        
+        diag_M = diagonal_matrix(steps)
+        eigenvals, _, _ = get_eigenmodes_sparse_rectangular(diag_M, L, dx, modes)
+        list_eigfreq.append(np.sqrt(-eigenvals))
+    return list_eigfreq
 
-        eigenfreqs, _, _ = get_eigenmodes_sparse_rectangular(diag_M, length, modes)
-        L_eigenfreqs.append(eigenfreqs)
-    return L_eigenfreqs
 
-def eigenfreqs_lengths_circular(L_lengths,modes=6):
-    L_eigenfreqs = []
-    for length in L_lengths:
-        diag_M = diagonal_matrix(length)
-        grid = circular_domain(length)
-        diag_M = diagonal_circle(grid, diag_M, length) 
+def eigenfreqs_size_circular(list_L, dx, modes=6):
+    list_eigfreq = []
+    for L in list_L:
+        steps = int(L/dx)
+        
+        diag_M = diagonal_matrix(steps)
+        grid = circular_domain(steps)
+        diag_M = diagonal_circle(grid, diag_M, steps) 
 
-        eigenfreqs, _, _ = get_eigenmodes_sparse_circular(diag_M, grid, length, modes)
-        L_eigenfreqs.append(eigenfreqs)
-    return L_eigenfreqs
+        eigenvals, _, _ = get_eigenmodes_sparse_circular(diag_M, grid, L, dx, modes)
+        list_eigfreq.append(np.sqrt(-eigenvals))
+    return list_eigfreq
 
-def visualise_eigenfreqs_lengths(lengths, LL_eigenfreqs):
-    """Plots the eigenfrequencies for different values of N for all three
+
+def visualise_eigenfreqs_size(list_L, listlist_eigfreq):
+    """Plots the eigenfrequencies for different sized domains for all three
     domain shapes.
     
     Parameters:
-    - lengths (list[int]): The list of lengths for which the eigenfrequencies
+    - list_L (list[int]): The list of lengths for which the eigenfrequencies
       have been calculated.
-    - LL_eigenfreqs (list[list[float]]): A list with the calculated
+    - listlist_eigfreq (list[list[float]]): A list with the calculated
       eigenfrequencies for each of the three shapes"""
 
     fig, axes = plt.subplots(1, 3, figsize=(12, 4))
 
     # Flatten the axes for correct image rendering
     axes = axes.flatten()
-
-    for ax in axes:
-        ax.set_axis_off()
     
-    L_lengths = [[x]*6 for x in lengths]
+    list_L = [[x]*6 for x in list_L]
     domain_shapes = ["Square", "Rectangular", "Circular"]
     for i in range(len(domain_shapes)):
         axes[i].set_axis_on()
-        for j in range(len(L_lengths)):
-            axes[i].scatter(L_lengths[j], LL_eigenfreqs[i][j], alpha=0.5)
-        axes[i].set_xlim(0,max(lengths)+10)
-        axes[i].set_ylim(-150,0)
+        for j in range(len(list_L)):
+            axes[i].scatter(list_L[j], listlist_eigfreq[i][j], alpha=0.5)
+        axes[i].set_xlim(0,np.max(list_L)+2)
         axes[i].set_xlabel("length")
         axes[i].set_ylabel("eigenfrequencies")
         axes[i].set_title(f"Shape = {domain_shapes[i]}")
-        #axes[i].axis('off')
 
     #plt.colorbar(label='Amplitude')
     plt.tight_layout()
     plt.savefig("results/2Dwave_sizedifferences.pdf")
 
 
-def time_dependent_visualise_square(eigenmode, eigenval, time=1, num_times=4, A=1, B=1, c=1):
-    max = np.max(np.abs(eigenmode))
+def time_dependent_visualise_square(eigenmode, eigenfreq, time=1, num_times=4, A=1, B=1, c=1):
+    vmax = np.max(np.abs(eigenmode * (np.cos(np.pi/4) + np.sin(np.pi/4))))
 
     horizontal = ((num_times // 3) +(num_times % 3))
     fig, axes = plt.subplots(horizontal, 3, figsize=(12, 4*horizontal))
@@ -418,77 +410,101 @@ def time_dependent_visualise_square(eigenmode, eigenval, time=1, num_times=4, A=
 
     for i in range(num_times):
         t = i*(time/(num_times-1))
-        u = eigenmode * (A*np.cos(c*eigenval*t)+B*np.sin(c*eigenval*t))
-        axes[i].imshow(u, cmap="bwr", extent=[0, 1, 0, 1], vmin=-max, vmax=max)
+        u = eigenmode * (A*np.cos(c*eigenfreq*t)+B*np.sin(c*eigenfreq*t))
+        axes[i].imshow(u, cmap="bwr", extent=[0, 1, 0, 1], vmin=-vmax, vmax=vmax)
         axes[i].set_axis_on()
-        axes[i].set_title(f"t={round(t, 4)}")
+        axes[i].set_title(f"t={round(t, 3)}", fontsize = 30)
 
     plt.tight_layout()
     plt.savefig("results/2Dwave_snapshots.pdf")
 
 
-def time_dependent_animation_square(eigenmode, eigenval, time=1, step=0.01, A=1, B=1, c=1):
+def time_dependent_animation(eigenmode, eigenfreq, mode, time=0.01, step=0.0001, A=1, B=1, c=1):
     """"""
-    max = np.max(np.abs(eigenmode))
+    vmax = np.max(np.abs(eigenmode * (np.cos(np.pi/4) + np.sin(np.pi/4))))
 
     fig, ax = plt.subplots()
-    im = ax.imshow(eigenmode, cmap="bwr", extent=[0, 1, 0, 1], vmin=-max, vmax=max)
+    im = ax.imshow(eigenmode, cmap="bwr", extent=[0, 1, 0, 1], vmin=-vmax, vmax=vmax)
 
     # Store precomputed frames
     ims = []
     for t in np.arange(0+step, time, step):
-        u = eigenmode * (A*np.cos(c*eigenval*t)+B*np.sin(c*eigenval*t))
-        im_ = ax.imshow(u, cmap="bwr", extent=[0, 1, 0, 1], animated=True, vmin=-max, vmax=max)
+        u = eigenmode * (A*np.cos(c*eigenfreq*t)+B*np.sin(c*eigenfreq*t))
+        im_ = ax.imshow(u, cmap="bwr", extent=[0, 1, 0, 1], animated=True, vmin=-vmax, vmax=vmax)
         ims.append([im_])
 
+    ax.set_title(f"2D Wave Equation (mode = {mode})")
     # Use ArtistAnimation
     ani = animation.ArtistAnimation(fig, ims, interval=100, blit=True)
-
     # Close the figure to not display in the notebook
     plt.close(fig)
 
     return ani
 
 
-def visualize_all_eigenfrequencies(N, modes=5):
-    fig, axes = plt.subplots(3, 5, figsize=(15,5))
+def time_dependent_animation_rectangular(eigenmode, eigenfreq, mode, time=0.01, step=0.0001, A=1, B=1, c=1):
+    """"""
+    vmax = np.max(np.abs(eigenmode * (np.cos(np.pi/4) + np.sin(np.pi/4))))
+
+    fig, ax = plt.subplots()
+    im = ax.imshow(eigenmode, cmap="bwr", extent=[0, 2, 0, 1], vmin=-vmax, vmax=vmax, aspect='equal')
+
+    # Store precomputed frames
+    ims = []
+    for t in np.arange(0+step, time, step):
+        u = eigenmode * (A*np.cos(c*eigenfreq*t)+B*np.sin(c*eigenfreq*t))
+        im_ = ax.imshow(u, cmap="bwr", extent=[0, 2, 0, 1], animated=True, vmin=-vmax, vmax=vmax, aspect='equal')
+        ims.append([im_])
+
+    ax.set_title(f"2D Wave Equation (mode = {mode})")
+    # Use ArtistAnimation
+    ani = animation.ArtistAnimation(fig, ims, interval=100, blit=True)
+    # Close the figure to not display in the notebook
+    plt.close(fig)
+
+    return ani
+
+
+def visualize_all_eigenfrequencies(L, dx, modes=5):
+    steps = int(L/dx)
+
+    fig, axes = plt.subplots(3, 5, figsize=(12,8))
     axes = axes.flatten()
 
     # Square grid
-    diag_M = diagonal_matrix(N)
-    eigv_sq, _, _, eigm_sq = get_eigenmodes(diag_M, N, modes=6)
+    diag_M = diagonal_matrix(steps)
+    eigv_sq, _, _, eigm_sq = get_eigenmodes(diag_M, L, dx, modes)
     eigenfre = (-eigv_sq) ** 0.5
 
     for i in range(modes):
         vmax = np.max(np.abs(eigm_sq[:,:,i]))
-        axes[i].imshow(eigm_sq[:, :, i], cmap='bwr', extent=[0, 1, 0, 1], vmin = -vmax, vmax = vmax)
+        axes[i].imshow(eigm_sq[:, :, i], cmap='bwr', extent=[0, L, 0, L], vmin = -vmax, vmax = vmax)
         axes[i].set_title(f"Mode = {i+1}, λ = {eigenfre[i]:.2f}")
 
-
     # Rectangular grid
-    diag_M = diagonal_rectangular(N)
+    diag_M = diagonal_rectangular(steps)
 
-    eigv_rec, _, _, eigm_rec = get_eigenmodes_rectangular(diag_M, N, modes)
+    eigv_rec, _, _, eigm_rec = get_eigenmodes_rectangular(diag_M, L, dx, modes)
     eigenfre = (-eigv_rec) ** 0.5
 
     for i in range(modes):
         vmax = np.max(np.abs(eigm_rec[:,:,i]))
-        im = axes[i+modes].imshow(eigm_rec[:,:,i], cmap='bwr', extent=[0, 2, 0, 1],
+        im = axes[i+modes].imshow(eigm_rec[:,:,i], cmap='bwr', extent=[0, 2*L, 0, L],
             vmin=-vmax, vmax=vmax, aspect='equal')
         axes[i+modes].set_title(f"Mode {i+1} λ = {eigenfre[i]:.2f}")
 
     # Circular grid
 
-    diag_M = diagonal_matrix(N)
-    grid = circular_domain(N)
-    diag_M = diagonal_circle(grid, diag_M, N) 
+    diag_M = diagonal_matrix(steps)
+    grid = circular_domain(steps)
+    diag_M = diagonal_circle(grid, diag_M, steps) 
 
-    eigv_cir, _, _, eigm_cir = get_eigenmodes_circular(diag_M, grid, N, modes)
+    eigv_cir, _, _, eigm_cir = get_eigenmodes_circular(diag_M, grid, L, dx, modes)
     eigenfre = (-eigv_cir) ** 0.5
 
     for i in range(modes):
         vmax = np.max(np.abs(eigm_cir[:,:,i]))
-        axes[i+(2*modes)].imshow(eigm_cir[:, :, i], cmap='bwr', extent=[0, 1, 0, 1], vmin = -vmax, vmax = vmax)
+        axes[i+(2*modes)].imshow(eigm_cir[:, :, i], cmap='bwr', extent=[0, L, 0, L], vmin = -vmax, vmax = vmax)
         axes[i+(2*modes)].set_title(f"Mode = {i+1}, λ = {eigenfre[i]:.2f}")
 
     for ax in axes:
