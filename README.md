@@ -7,10 +7,10 @@ Scientific Computing course assignments. Group consist of: Liesbet Ooghe, Freder
 This code is written for assignment 3 of Scientific Computing, a UvA Course.
 
 '\src' contains files with functions to run the code
-- direct.py: 
+- direct.py: Contains function to solve the diffusion equation using direct methods 
 - eigenvalue_problem.py: This code holds functions to solve and visualize the eigenvalue problem.
 - leapfrog.py: 
-- phase.py:
+- phase.py: Contains functions to simulate a simplate harmonic oscillator under the influence of an external driving force.
 
 '\results' contains output files with animations and images.
 
