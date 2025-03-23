@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 
+
 def diagonal_matrix(N):
     """Creates the Matrix M of the eigenvalue problem. Length is the 
     (length x length) size of a grid."""
@@ -290,9 +291,6 @@ def get_eigenmodes_sparse_square(M, N, modes=6):
 
     return eigenvalues, eigenvectors, eigenmodes
 
-import numpy as np
-import scipy.sparse
-import scipy.sparse.linalg
 
 def get_eigenmodes_sparse_rectangular(M, N, modes=6):
     """
@@ -519,15 +517,15 @@ def visualize_all_diagonals(N):
     grid = circular_domain(N)
     M_c = diagonal_circle(grid, M_c, N)
 
-    fig, axes = plt.subplots(1, 3, figsize=(10,6))
+    fig, axes = plt.subplots(1, 3, figsize=(9,3))
     axes = axes.flatten()
 
     axes[0].matshow(M_sq, cmap='viridis')
-    axes[0].set_title("Square Domain")
+    axes[0].set_title("Square Domain", fontsize=16)
     axes[1].matshow(M_r, cmap='viridis')
-    axes[1].set_title("Rectangular Domain")
+    axes[1].set_title("Rectangular Domain", fontsize=16)
     axes[2].matshow(M_c, cmap='viridis')
-    axes[2].set_title("Circular Domain")
+    axes[2].set_title("Circular Domain", fontsize=16)
 
     for ax in axes:
         ax.set_xticks([])
