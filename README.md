@@ -9,7 +9,7 @@ This code is written for assignment 3 of Scientific Computing, a UvA Course.
 '\src' contains files with functions to run the code
 - direct.py: Contains function to solve the diffusion equation using direct methods 
 - eigenvalue_problem.py: This code holds functions to solve and visualize the eigenvalue problem.
-- leapfrog.py: 
+- leapfrog.py: Implements a 1D Harmonic Oscillator using Leapfrog method
 - phase.py: Contains functions to simulate a simplate harmonic oscillator under the influence of an external driving force.
 
 '\results' contains output files with animations and images.
